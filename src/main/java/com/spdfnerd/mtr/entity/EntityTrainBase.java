@@ -10,13 +10,17 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Packet;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.util.math.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SSpawnObjectPacket;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
@@ -28,7 +32,7 @@ public abstract class EntityTrainBase extends Entity {
 	public int stationCoolDown;
 
 	private float prevYaw;
-	private int clientInterpolationSteps;
+	private int clientRotationIncrements;
 	private double clientX;
 	private double clientY;
 	private double clientZ;
@@ -38,14 +42,14 @@ public abstract class EntityTrainBase extends Entity {
 
 	private final Map<Integer, Pos3f> passengerOffsets;
 
-	private static final TrackedData<Float> YAW = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.FLOAT);
-	private static final TrackedData<Float> PITCH = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.FLOAT);
-	private static final TrackedData<Integer> DOOR_VALUE = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.INTEGER);
-	private static final TrackedData<Boolean> DOOR_LEFT = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.BOOLEAN);
-	private static final TrackedData<Boolean> DOOR_RIGHT = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.BOOLEAN);
-	private static final TrackedData<Boolean> IS_END_1_HEAD = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.BOOLEAN);
-	private static final TrackedData<Boolean> IS_END_2_HEAD = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.BOOLEAN);
-	private static final TrackedData<Boolean> HEAD_1_IS_FRONT = DataTracker.registerData(EntityTrainBase.class, TrackedDataHandlerRegistry.BOOLEAN);
+	private static final DataParameter<Float> YAW = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.FLOAT);
+	private static final DataParameter<Float> PITCH = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.FLOAT);
+	private static final DataParameter<Integer> DOOR_VALUE = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.VARINT);
+	private static final DataParameter<Boolean> DOOR_LEFT = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Boolean> DOOR_RIGHT = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Boolean> IS_END_1_HEAD = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Boolean> IS_END_2_HEAD = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Boolean> HEAD_1_IS_FRONT = EntityDataManager.createKey(EntityTrainBase.class, DataSerializers.BOOLEAN);
 
 	protected EntityTrainBase(EntityType<?> type, World world) {
 		super(type, world);
@@ -56,38 +60,38 @@ public abstract class EntityTrainBase extends Entity {
 
 	protected EntityTrainBase(EntityType<?> type, World world, double x, double y, double z) {
 		this(type, world);
-		updatePosition(x, y, z);
-		setVelocity(Vec3d.ZERO);
-		prevX = x;
-		prevY = y;
-		prevZ = z;
+		setPosition(x, y, z);
+		setVelocity(0f, 0f, 0f);
+		prevPosX = x;
+		prevPosY = y;
+		prevPosZ = z;
 	}
 
 	@Override
 	public void tick() {
-		if (world.isClient) {
-			final float dataTrackerYaw = dataTracker.get(YAW);
-			final float dataTrackerPitch = dataTracker.get(PITCH);
+		if (world.isRemote) {
+			final float dataManagerYaw = dataManager.get(YAW);
+			final float dataManagerPitch = dataManager.get(PITCH);
 
-			if (clientInterpolationSteps > 0) {
-				final double x = getX() + (clientX - getX()) / clientInterpolationSteps;
-				final double y = getY() + (clientY - getY()) / clientInterpolationSteps;
-				final double z = getZ() + (clientZ - getZ()) / clientInterpolationSteps;
+			if (clientRotationIncrements > 0) {
+				final double x = getPosX() + (clientX - getPosX()) / clientRotationIncrements;
+				final double y = getPosY() + (clientY - getPosY()) / clientRotationIncrements;
+				final double z = getPosZ() + (clientZ - getPosZ()) / clientRotationIncrements;
 
-				yaw = (float) (dataTrackerYaw + MathHelper.wrapDegrees(clientYaw - dataTrackerYaw) / clientInterpolationSteps);
-				pitch = (float) (dataTrackerPitch + (clientPitch - dataTrackerPitch) / clientInterpolationSteps);
-				--clientInterpolationSteps;
-				updatePosition(x, y, z);
+				rotationYaw = (float) (dataManagerYaw + MathHelper.wrapDegrees(clientYaw - dataManagerYaw) / clientRotationIncrements);
+				rotationPitch = (float) (dataManagerPitch + (clientPitch - dataManagerPitch) / clientRotationIncrements);
+				--clientRotationIncrements;
+				setPosition(x, y, z);
 			} else {
-				yaw = dataTrackerYaw;
-				pitch = dataTrackerPitch;
-				refreshPosition();
+				rotationYaw = dataManagerYaw;
+				rotationPitch = dataManagerPitch;
+				recenterBoundingBox();
 			}
 
-			setRotation(yaw, pitch);
+			setRotation(rotationYaw, rotationPitch);
 		} else {
 			if (stationCoolDown > 0) {
-				checkBlockCollision();
+				doBlockCollisions();
 				mountCollidingLivingEntities();
 			}
 
@@ -103,9 +107,9 @@ public abstract class EntityTrainBase extends Entity {
 
 			if (getDoorValue() > 0) {
 				final int width = getTrainType().getWidth();
-				final Vec3d offsetVec = new Vec3d(width, 0, 0).rotateY((float) Math.toRadians(yaw));
-				final BlockPos checkPosLeft = new BlockPos(getPos().add(offsetVec));
-				final BlockPos checkPosRight = new BlockPos(getPos().subtract(offsetVec));
+				final Vector3d offsetVec = new Vector3d(width, 0, 0).rotateYaw((float) Math.toRadians(rotationYaw));
+				final BlockPos checkPosLeft = new BlockPos(getPositionVec().add(offsetVec));
+				final BlockPos checkPosRight = new BlockPos(getPositionVec().subtract(offsetVec));
 				setDoors(isPlatformOrDoor(checkPosLeft) || isPlatformOrDoor(checkPosLeft.up()) || isPlatformOrDoor(checkPosLeft.down()), isPlatformOrDoor(checkPosRight) || isPlatformOrDoor(checkPosRight.up()) || isPlatformOrDoor(checkPosRight.down()));
 			} else {
 				setDoors(false, false);
@@ -113,38 +117,38 @@ public abstract class EntityTrainBase extends Entity {
 
 			killTimer++;
 			if (killTimer > 2) {
-				kill();
+				onKillCommand();
 			}
 		}
 	}
 
 	@Override
-	public void updatePositionAndAngles(double x, double y, double z, float yaw, float pitch) {
-		super.updatePositionAndAngles(x, y, z, yaw, pitch);
-		dataTracker.set(YAW, yaw);
-		dataTracker.set(PITCH, pitch);
+	public void setPositionAndRotation(double x, double y, double z, float yaw, float pitch) {
+		super.setPositionAndRotation(x, y, z, yaw, pitch);
+		dataManager.set(YAW, yaw);
+		dataManager.set(PITCH, pitch);
 		killTimer = 0;
 	}
 
 	@Override
-	public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate) {
+	public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
 		clientX = x;
 		clientY = y;
 		clientZ = z;
 		clientYaw = yaw;
 		clientPitch = pitch;
-		clientInterpolationSteps = interpolationSteps + 2;
+		clientRotationIncrements = posRotationIncrements + 2;
 	}
 
 	@Override
-	public void updatePassengerPosition(Entity passenger) {
+	public void updatePassenger(Entity passenger) {
 		if (passenger instanceof LivingEntity) {
 			final LivingEntity mob = (LivingEntity) passenger;
 			final int entityId = passenger.getEntityId();
 
 			if (passengerOffsets.containsKey(passenger.getEntityId())) {
 				final Pos3f offset = passengerOffsets.get(entityId);
-				offset.add(new Pos3f(mob.sidewaysSpeed / 5, 0, mob.forwardSpeed / 5).rotateY((float) Math.toRadians(-yaw - passenger.yaw)));
+				offset.add(new Pos3f(mob.moveStrafing / 5, 0, mob.moveForward / 5).rotateY((float) Math.toRadians(-rotationYaw - passenger.rotationYaw)));
 
 				final float length = getTrainType().getLength() / 2F;
 				final float width = getTrainType().getWidth() / 2F;
@@ -154,27 +158,28 @@ public abstract class EntityTrainBase extends Entity {
 				passengerOffsets.put(entityId, new Pos3f(0, 0, 0));
 			}
 
-			final Pos3f offset = passengerOffsets.get(entityId).rotateX((float) Math.toRadians(pitch)).rotateY((float) Math.toRadians(yaw));
-			passenger.updatePosition(getX() + offset.getX(), getY() + getMountedHeightOffset() + offset.getY(), getZ() + offset.getZ());
+			final Pos3f offset = passengerOffsets.get(entityId).rotateX((float) Math.toRadians(rotationPitch)).rotateY((float) Math.toRadians(rotationYaw));
+			passenger.setPosition(getPosX() + offset.getX(), getPosY() + getMountedYOffset() + offset.getY(), getPosZ() + offset.getZ());
 		} else {
-			passenger.updatePosition(getX(), getY() + getMountedHeightOffset(), getZ());
+			passenger.setPosition(getPosX(), getPosY() + getMountedYOffset(), getPosZ());
 		}
 
-		final float yawChange = MathHelper.wrapDegrees(prevYaw - yaw);
-		passenger.yaw += yawChange;
-		passenger.setHeadYaw(passenger.getHeadYaw() + yawChange);
-		prevYaw = yaw;
+		final float yawChange = MathHelper.wrapDegrees(prevYaw - rotationYaw);
+		passenger.rotationYaw += yawChange;
+		passenger.setRotationYawHead(passenger.getRotationYawHead() + yawChange);
+		prevYaw = rotationYaw;
 	}
 
 	@Override
-	public Vec3d updatePassengerForDismount(LivingEntity passenger) {
-		final Vec3d offsetVec = new Vec3d(1, 0, 0).rotateY((float) Math.toRadians(yaw));
+	public Vector3d func_230268_c_(LivingEntity passenger) {
+		final Vector3d offsetVec = new Vector3d(1, 0, 0).rotateYaw((float) Math.toRadians(rotationYaw));
 		final int[] checkHeights = {0, -1, 1};
 
 		if (getDoorValue() > 0 && (getDoorLeft() || getDoorRight())) {
 			for (final int height : checkHeights) {
 				for (int offset = 1; offset <= 3; offset++) {
-					final Vec3d checkPos = passenger.getPos().add(offsetVec.multiply(offset * (getDoorLeft() ? 1 : -1)).subtract(0, height, 0));
+					final Vector3d checkPos = passenger.getPositionVec().add(offsetVec.mul(offset * (getDoorLeft() ? 1 : -1), offset * (getDoorLeft() ? 1 :
+							-1), offset * (getDoorLeft() ? 1 : -1)).subtract(0, height, 0));
 					if (canDismountHere(checkPos)) {
 						return checkPos;
 					}
@@ -185,65 +190,67 @@ public abstract class EntityTrainBase extends Entity {
 		final int[] checkOffsets = {1, -1, 2, -2, 3, -3};
 		for (final int height : checkHeights) {
 			for (final int offset : checkOffsets) {
-				final Vec3d checkPos = passenger.getPos().add(offsetVec.multiply(offset).subtract(0, height, 0));
+				final Vector3d checkPos = passenger.getPositionVec().add(offsetVec.mul(offset, offset, offset).subtract(0, height, 0));
 				if (canDismountHere(checkPos)) {
 					return checkPos;
 				}
 			}
 		}
 
-		return super.updatePassengerForDismount(passenger);
+		return super.func_230268_c_(passenger);
 	}
 
 	@Override
-	public double getMountedHeightOffset() {
+	public double getMountedYOffset() {
 		return 1;
 	}
 
 	@Override
-	public Packet<?> createSpawnPacket() {
-		return new EntitySpawnS2CPacket(this);
-	}
-
-
-	@Override
-	protected boolean canAddPassenger(Entity passenger) {
-		return getPassengerList().size() < getTrainType().getCapacity();
+	public IPacket<?> createSpawnPacket() {
+		return new SSpawnObjectPacket(this);
 	}
 
 	@Override
-	protected void readCustomDataFromTag(CompoundTag tag) {
+	protected boolean canFitPassenger(Entity passenger) {
+		return getPassengers().size() < getTrainType().getCapacity();
 	}
 
 	@Override
-	protected void writeCustomDataToTag(CompoundTag tag) {
+	protected void readAdditional(CompoundNBT tag) {
 	}
 
 	@Override
-	protected void initDataTracker() {
-		dataTracker.startTracking(YAW, 0F);
-		dataTracker.startTracking(PITCH, 0F);
-		dataTracker.startTracking(DOOR_VALUE, 0);
-		dataTracker.startTracking(DOOR_LEFT, false);
-		dataTracker.startTracking(DOOR_RIGHT, false);
-		dataTracker.startTracking(IS_END_1_HEAD, true);
-		dataTracker.startTracking(IS_END_2_HEAD, true);
-		dataTracker.startTracking(HEAD_1_IS_FRONT, true);
+	protected void writeAdditional(CompoundNBT tag) {
 	}
 
-	public boolean inTrain(Vec3d pos) {
+	@Override
+	protected void registerData() {
+		dataManager.register(YAW, 0F);
+		dataManager.register(PITCH, 0F);
+		dataManager.register(DOOR_VALUE, 0);
+		dataManager.register(DOOR_LEFT, false);
+		dataManager.register(DOOR_RIGHT, false);
+		dataManager.register(IS_END_1_HEAD, true);
+		dataManager.register(IS_END_2_HEAD, true);
+		dataManager.register(HEAD_1_IS_FRONT, true);
+	}
+
+	public boolean inTrain(Vector3d pos) {
 		final float length = getTrainType().getLength() / 2F;
 		final float widthBigger = getTrainType().getWidth() / 2F + 0.5F;
-		final Vec3d posRelative = pos.subtract(getPos()).rotateX((float) Math.toRadians(-pitch)).rotateY((float) Math.toRadians(-yaw));
+		final Vector3d posRelative =
+				pos.subtract(getPositionVec()).rotatePitch((float) Math.toRadians(-rotationPitch)).rotateYaw((float) Math.toRadians(-rotationYaw));
 		return RailwayData.isBetween(posRelative.x, -widthBigger, widthBigger) && RailwayData.isBetween(posRelative.y, -widthBigger, widthBigger) && RailwayData.isBetween(posRelative.z, -length, length);
 	}
 
 	protected void mountCollidingLivingEntities() {
-		if (!world.isClient && getDoorValue() > 0) {
+		if (!world.isRemote && getDoorValue() > 0) {
 			final float length = getTrainType().getLength() / 2F;
-			world.getNonSpectatingEntities(LivingEntity.class, new Box(getPos().subtract(length, length, length), getPos().add(length, length, length))).stream().filter(entity -> !entity.hasVehicle()).forEach(entity -> {
-				if (inTrain(entity.getPos())) {
-					final Vec3d passengerOffsetRotated = entity.getPos().subtract(getPos()).rotateY((float) Math.toRadians(-yaw)).rotateX((float) Math.toRadians(-pitch));
+			world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(getPositionVec().subtract(length, length, length), getPositionVec().add(length, length, length))).stream()
+					.filter(Entity::isPassenger).forEach(entity -> {
+				if (inTrain(entity.getPositionVec())) {
+					final Vector3d passengerOffsetRotated =
+							entity.getPositionVec().subtract(getPositionVec()).rotateYaw((float) Math.toRadians(-rotationYaw)).rotatePitch((float) Math.toRadians(-rotationPitch));
 					passengerOffsets.put(entity.getEntityId(), new Pos3f(0, 0, (float) passengerOffsetRotated.z));
 					entity.startRiding(this);
 				}
@@ -252,45 +259,45 @@ public abstract class EntityTrainBase extends Entity {
 	}
 
 	public void setDoorValue(int doorValue) {
-		dataTracker.set(DOOR_VALUE, doorValue);
+		dataManager.set(DOOR_VALUE, doorValue);
 	}
 
 	public int getDoorValue() {
-		return dataTracker.get(DOOR_VALUE);
+		return dataManager.get(DOOR_VALUE);
 	}
 
 	public void setDoors(boolean doorLeft, boolean doorRight) {
-		dataTracker.set(DOOR_LEFT, doorLeft);
-		dataTracker.set(DOOR_RIGHT, doorRight);
+		dataManager.set(DOOR_LEFT, doorLeft);
+		dataManager.set(DOOR_RIGHT, doorRight);
 	}
 
 	public boolean getDoorLeft() {
-		return dataTracker.get(DOOR_LEFT);
+		return dataManager.get(DOOR_LEFT);
 	}
 
 	public boolean getDoorRight() {
-		return dataTracker.get(DOOR_RIGHT);
+		return dataManager.get(DOOR_RIGHT);
 	}
 
 	public void setIsEndHead(boolean isEnd1Head, boolean isEnd2Head) {
-		dataTracker.set(IS_END_1_HEAD, isEnd1Head);
-		dataTracker.set(IS_END_2_HEAD, isEnd2Head);
+		dataManager.set(IS_END_1_HEAD, isEnd1Head);
+		dataManager.set(IS_END_2_HEAD, isEnd2Head);
 	}
 
 	public boolean getIsEnd1Head() {
-		return dataTracker.get(IS_END_1_HEAD);
+		return dataManager.get(IS_END_1_HEAD);
 	}
 
 	public boolean getIsEnd2Head() {
-		return dataTracker.get(IS_END_2_HEAD);
+		return dataManager.get(IS_END_2_HEAD);
 	}
 
 	public void setHead1IsFront(boolean head1IsFront) {
-		dataTracker.set(HEAD_1_IS_FRONT, head1IsFront);
+		dataManager.set(HEAD_1_IS_FRONT, head1IsFront);
 	}
 
 	public boolean getHead1IsFront() {
-		return dataTracker.get(HEAD_1_IS_FRONT);
+		return dataManager.get(HEAD_1_IS_FRONT);
 	}
 
 	protected abstract Train.TrainType getTrainType();
@@ -300,11 +307,12 @@ public abstract class EntityTrainBase extends Entity {
 		return block instanceof BlockPlatform || block instanceof BlockPSDAPGBase;
 	}
 
-	private boolean canDismountHere(Vec3d vec3d) {
-		final BlockPos pos = new BlockPos(vec3d);
-		final boolean flatTop = world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos.down(), Direction.UP);
-		final boolean middleNotSolid = !world.getBlockState(pos).isSolidBlock(world, pos);
-		final boolean topNotSolid = !world.getBlockState(pos.up()).isSolidBlock(world, pos.up());
+	private boolean canDismountHere(Vector3d vector3d) {
+		final BlockPos pos = new BlockPos(vector3d);
+		final boolean flatTop = world.getBlockState(pos.down()).isSolidSide(world, pos.down(), Direction.UP);
+		final boolean middleNotSolid = !world.getBlockState(pos).isOpaqueCube(world, pos);
+		final boolean topNotSolid = !world.getBlockState(pos.up()).isOpaqueCube(world, pos.up());
 		return flatTop && middleNotSolid && topNotSolid;
 	}
+
 }
