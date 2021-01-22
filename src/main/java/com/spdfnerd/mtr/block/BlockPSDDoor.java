@@ -1,6 +1,5 @@
 package com.spdfnerd.mtr.block;
 
-import com.spdfnerd.mtr.Items;
 import net.minecraft.item.Item;
 
 public class BlockPSDDoor extends BlockPSDAPGDoorBase {

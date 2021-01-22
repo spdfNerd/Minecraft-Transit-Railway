@@ -1,6 +1,5 @@
 package com.spdfnerd.mtr.block;
 
-import com.spdfnerd.mtr.Items;
 import com.spdfnerd.mtr.MTR;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;

@@ -1,7 +1,6 @@
 package com.spdfnerd.mtr.block;
 
 import com.spdfnerd.mtr.entity.EntityTrainBase;
-import com.spdfnerd.mtr.Blocks;
 import com.spdfnerd.mtr.data.Platform;
 import com.spdfnerd.mtr.data.RailwayData;
 import com.spdfnerd.mtr.packet.PacketTrainDataGuiServer;

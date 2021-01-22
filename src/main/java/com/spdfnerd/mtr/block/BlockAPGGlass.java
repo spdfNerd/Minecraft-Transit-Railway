@@ -1,6 +1,5 @@
 package com.spdfnerd.mtr.block;
 
-import com.spdfnerd.mtr.Items;
 import com.spdfnerd.mtr.MTR;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;

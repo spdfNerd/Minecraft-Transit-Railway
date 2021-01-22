@@ -4,7 +4,6 @@ import com.spdfnerd.mtr.block.BlockEscalatorBase;
 import com.spdfnerd.mtr.block.BlockEscalatorSide;
 import com.spdfnerd.mtr.block.BlockEscalatorStep;
 import com.spdfnerd.mtr.block.IBlock;
-import com.spdfnerd.mtr.Blocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;

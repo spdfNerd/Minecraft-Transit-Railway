@@ -3,7 +3,6 @@ package com.spdfnerd.mtr.item;
 import com.spdfnerd.mtr.block.BlockPSDAPGBase;
 import com.spdfnerd.mtr.block.BlockPSDTop;
 import com.spdfnerd.mtr.block.IBlock;
-import com.spdfnerd.mtr.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
