@@ -59,22 +59,22 @@ public class Registration {
 		ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static final RegistryObject<Item> APG_DOOR = ITEMS.register("apg_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
+	public static final RegistryObject<Item> APG_DOOR_ITEM = ITEMS.register("apg_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
 			ItemPSDAPGBase.EnumPSDAPGType.APG));
-	public static final RegistryObject<Item> APG_GLASS = ITEMS.register("apg_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
+	public static final RegistryObject<Item> APG_GLASS_ITEM = ITEMS.register("apg_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
 			ItemPSDAPGBase.EnumPSDAPGType.APG));
-	public static final RegistryObject<Item> APG_GLASS_END = ITEMS.register("apg_glass_end",
+	public static final RegistryObject<Item> APG_GLASS_END_ITEM = ITEMS.register("apg_glass_end",
 			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.APG));
 	public static final RegistryObject<Item> BRUSH = ITEMS.register("brush", () -> new Item(new Item.Properties().group(ItemGroup.TOOLS).maxStackSize(1)));
 	public static final RegistryObject<Item> DASHBOARD = ITEMS.register("dashboard",
 			() -> new ItemDashboard(new Item.Properties().group(ItemGroup.TOOLS).maxStackSize(1)));
 	public static final RegistryObject<Item> ESCALATOR = ITEMS.register("escalator",
 			() -> new ItemEscalator(new Item.Properties().group(ItemGroup.TRANSPORTATION)));
-	public static final RegistryObject<Item> PSD_DOOR = ITEMS.register("psd_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
+	public static final RegistryObject<Item> PSD_DOOR_ITEM = ITEMS.register("psd_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
 			ItemPSDAPGBase.EnumPSDAPGType.PSD));
-	public static final RegistryObject<Item> PSD_GLASS = ITEMS.register("psd_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
+	public static final RegistryObject<Item> PSD_GLASS_ITEM = ITEMS.register("psd_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
 			ItemPSDAPGBase.EnumPSDAPGType.PSD));
-	public static final RegistryObject<Item> PSD_GLASS_END = ITEMS.register("psd_glass_end",
+	public static final RegistryObject<Item> PSD_GLASS_END_ITEM = ITEMS.register("psd_glass_end",
 			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.PSD));
 
 	public static final RegistryObject<Block> APG_DOOR = BLOCKS.register("apg_door", BlockAPGDoor::new);
