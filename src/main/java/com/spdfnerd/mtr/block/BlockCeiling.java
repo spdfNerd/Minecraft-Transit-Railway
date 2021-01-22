@@ -2,43 +2,43 @@ package com.spdfnerd.mtr.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 
 public class BlockCeiling extends Block {
 
-	public static final BooleanProperty FACING = BooleanProperty.of("facing");
-	public static final BooleanProperty LIGHT = BooleanProperty.of("light");
+	public static final BooleanProperty FACING = BooleanProperty.create("facing");
+	public static final BooleanProperty LIGHT = BooleanProperty.create("light");
 
-	public BlockCeiling(Settings settings) {
-		super(settings);
+	public BlockCeiling(Properties properties) {
+		super(properties);
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		boolean facing = ctx.getPlayerFacing().getAxis() == Direction.Axis.X;
-		return getDefaultState().with(FACING, facing).with(LIGHT, hasLight(facing, ctx.getBlockPos()));
+	public BlockState getStateForPlacement(BlockItemUseContext context) {
+		boolean facing = context.getPlayer().getHorizontalFacing().getAxis() == Direction.Axis.X;
+		return getDefaultState().with(FACING, facing).with(LIGHT, hasLight(facing, context.getPos()));
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return Block.createCuboidShape(0, 7, 0, 16, 10, 16);
+	public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+		return Block.makeCuboidShape(0, 7, 0, 16, 10, 16);
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		return state.with(LIGHT, hasLight(IBlock.getStatePropertySafe(state, FACING), pos));
+	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld worldIn, BlockPos currentPos, BlockPos facingPos) {
+		return state.with(LIGHT, hasLight(IBlock.getStatePropertySafe(state, FACING), currentPos));
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
 		builder.add(FACING, LIGHT);
 	}
 
@@ -49,4 +49,5 @@ public class BlockCeiling extends Block {
 			return pos.getX() % 3 == 0;
 		}
 	}
+
 }

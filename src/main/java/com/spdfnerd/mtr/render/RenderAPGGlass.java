@@ -1,8 +1,8 @@
 package com.spdfnerd.mtr.render;
 
-import com.spdfnerd.mtr.block.BlockAPGGlass;
 import com.spdfnerd.mtr.block.IBlock;
 import com.spdfnerd.mtr.gui.IGui;
+import com.spdfnerd.mtr.tileentity.APGGlassTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -11,7 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldAccess;
 
-public class RenderAPGGlass extends RenderRouteBase<BlockAPGGlass.TileEntityAPGGlass> implements IGui, IBlock {
+public class RenderAPGGlass extends RenderRouteBase<APGGlassTileEntity> implements IGui, IBlock {
 
 	private static final float COLOR_STRIP_START = 0.75F;
 	private static final float COLOR_STRIP_END = 0.78125F;

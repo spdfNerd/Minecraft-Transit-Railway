@@ -3,57 +3,58 @@ package com.spdfnerd.mtr.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.ActionResult;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 
 public class BlockEscalatorStep extends BlockEscalatorBase {
 
-	public static final BooleanProperty DIRECTION = BooleanProperty.of("direction");
+	public static final BooleanProperty DIRECTION = BooleanProperty.create("direction");
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		if (direction == Direction.UP && !(world.getBlockState(pos.up()).getBlock() instanceof BlockEscalatorSide)) {
+	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {
+		if (facing == Direction.UP && !(world.getBlockState(currentPos.up()).getBlock() instanceof BlockEscalatorSide)) {
 			return Blocks.AIR.getDefaultState();
 		} else {
-			return super.getStateForNeighborUpdate(state, direction, newState, world, pos, posFrom);
+			return super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);
 		}
 	}
 
 	@Override
-	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+	public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		if (IBlock.getStatePropertySafe(state, SIDE) == EnumSide.RIGHT) {
-			onBreakCreative(world, player, pos.offset(IBlock.getSideDirection(state)));
+			IBlock.onBreakCreative(world, player, pos.offset(IBlock.getSideDirection(state)));
 		}
-		super.onBreak(world, pos, state, player);
+		super.onBlockHarvested(world, pos, state, player);
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
 		EnumEscalatorOrientation orientation = IBlock.getStatePropertySafe(state, ORIENTATION);
 		if (orientation == EnumEscalatorOrientation.FLAT || orientation == EnumEscalatorOrientation.TRANSITION_BOTTOM) {
-			return Block.createCuboidShape(0, 0, 0, 16, 15, 16);
+			return Block.makeCuboidShape(0d, 0d, 0d, 16d, 15d, 16);
 		} else {
-			return VoxelShapes.combineAndSimplify(Block.createCuboidShape(1, 0, 1, 15, 16, 15), super.getCollisionShape(state, world, pos, context), BooleanBiFunction.AND);
+			return VoxelShapes.combineAndSimplify(Block.makeCuboidShape(1d, 0d, 1d, 15d, 16d, 15), super.getCollisionShape(state, world, pos, context),
+					IBooleanFunction.AND);
 		}
 	}
 
 	@Override
 	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
+		final Direction facing = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
 		final boolean direction = IBlock.getStatePropertySafe(state, DIRECTION);
 		final float speed = 0.1F;
 
@@ -76,15 +77,15 @@ public class BlockEscalatorStep extends BlockEscalatorBase {
 	}
 
 	@Override
-	public void onLandedUpon(World world, BlockPos pos, Entity entity, float distance) {
-		super.onLandedUpon(world, pos, entity, distance * 0.5F);
+	public void onFallenUpon(World world, BlockPos pos, Entity entity, float fallDistance) {
+		super.onFallenUpon(world, pos, entity, fallDistance * 0.5F);
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
 		return IBlock.checkHoldingBrush(world, player, () -> {
 			final boolean direction = !IBlock.getStatePropertySafe(state, DIRECTION);
-			final Direction blockFacing = IBlock.getStatePropertySafe(state, FACING);
+			final Direction blockFacing = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
 
 			update(world, pos, blockFacing, direction);
 			update(world, pos, blockFacing.getOpposite(), direction);
@@ -99,8 +100,8 @@ public class BlockEscalatorStep extends BlockEscalatorBase {
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(FACING, DIRECTION, ORIENTATION, SIDE);
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(HORIZONTAL_FACING, DIRECTION, ORIENTATION, SIDE);
 	}
 
 	private void update(World world, BlockPos pos, Direction offset, boolean direction) {
@@ -122,4 +123,5 @@ public class BlockEscalatorStep extends BlockEscalatorBase {
 		final Block block = world.getBlockState(pos).getBlock();
 		return block instanceof BlockEscalatorStep;
 	}
+
 }

@@ -3,6 +3,7 @@ package com.spdfnerd.mtr.render;
 import com.spdfnerd.mtr.block.BlockClock;
 import com.spdfnerd.mtr.block.IBlock;
 import com.spdfnerd.mtr.gui.IGui;
+import com.spdfnerd.mtr.tileentity.ClockTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
@@ -12,14 +13,14 @@ import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class RenderClock extends BlockEntityRenderer<BlockClock.TileEntityClock> implements IGui, IBlock {
+public class RenderClock extends BlockEntityRenderer<ClockTileEntity> implements IGui, IBlock {
 
 	public RenderClock(BlockEntityRenderDispatcher dispatcher) {
 		super(dispatcher);
 	}
 
 	@Override
-	public void render(BlockClock.TileEntityClock entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+	public void render(ClockTileEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		final World world = entity.getWorld();
 		if (world == null) {
 			return;

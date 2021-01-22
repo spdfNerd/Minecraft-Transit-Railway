@@ -5,6 +5,7 @@ import com.spdfnerd.mtr.block.BlockPSDAPGGlassEndBase;
 import com.spdfnerd.mtr.block.BlockPSDTop;
 import com.spdfnerd.mtr.block.IBlock;
 import com.spdfnerd.mtr.model.PSDTopModel;
+import com.spdfnerd.mtr.tileentity.PSDTopTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
@@ -12,7 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldAccess;
 
-public class RenderPSDTop extends RenderRouteBase<BlockPSDTop.TileEntityPSDTop> implements IBlock {
+public class RenderPSDTop extends RenderRouteBase<PSDTopTileEntity> implements IBlock {
 
 	private static final float COLOR_STRIP_START = 0.90625F;
 	private static final float COLOR_STRIP_END = 0.9375F;

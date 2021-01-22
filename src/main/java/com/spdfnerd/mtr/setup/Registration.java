@@ -7,6 +7,7 @@ import com.spdfnerd.mtr.entity.*;
 import com.spdfnerd.mtr.item.ItemDashboard;
 import com.spdfnerd.mtr.item.ItemEscalator;
 import com.spdfnerd.mtr.item.ItemPSDAPGBase;
+import com.spdfnerd.mtr.tileentity.*;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -59,27 +60,19 @@ public class Registration {
 		ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static final RegistryObject<Item> APG_DOOR_ITEM = ITEMS.register("apg_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
-			ItemPSDAPGBase.EnumPSDAPGType.APG));
-	public static final RegistryObject<Item> APG_GLASS_ITEM = ITEMS.register("apg_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
-			ItemPSDAPGBase.EnumPSDAPGType.APG));
-	public static final RegistryObject<Item> APG_GLASS_END_ITEM = ITEMS.register("apg_glass_end",
-			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.APG));
 	public static final RegistryObject<Item> BRUSH = ITEMS.register("brush", () -> new Item(new Item.Properties().group(ItemGroup.TOOLS).maxStackSize(1)));
 	public static final RegistryObject<Item> DASHBOARD = ITEMS.register("dashboard",
 			() -> new ItemDashboard(new Item.Properties().group(ItemGroup.TOOLS).maxStackSize(1)));
-	public static final RegistryObject<Item> ESCALATOR = ITEMS.register("escalator",
-			() -> new ItemEscalator(new Item.Properties().group(ItemGroup.TRANSPORTATION)));
-	public static final RegistryObject<Item> PSD_DOOR_ITEM = ITEMS.register("psd_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
-			ItemPSDAPGBase.EnumPSDAPGType.PSD));
-	public static final RegistryObject<Item> PSD_GLASS_ITEM = ITEMS.register("psd_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
-			ItemPSDAPGBase.EnumPSDAPGType.PSD));
-	public static final RegistryObject<Item> PSD_GLASS_END_ITEM = ITEMS.register("psd_glass_end",
-			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.PSD));
 
 	public static final RegistryObject<Block> APG_DOOR = BLOCKS.register("apg_door", BlockAPGDoor::new);
+	public static final RegistryObject<Item> APG_DOOR_ITEM = ITEMS.register("apg_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
+			ItemPSDAPGBase.EnumPSDAPGType.APG));
 	public static final RegistryObject<Block> APG_GLASS = BLOCKS.register("apg_glass", BlockAPGGlass::new);
+	public static final RegistryObject<Item> APG_GLASS_ITEM = ITEMS.register("apg_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
+			ItemPSDAPGBase.EnumPSDAPGType.APG));
 	public static final RegistryObject<Block> APG_GLASS_END = BLOCKS.register("apg_glass_end", BlockAPGGlassEnd::new);
+	public static final RegistryObject<Item> APG_GLASS_END_ITEM = ITEMS.register("apg_glass_end",
+			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.APG));
 	public static final RegistryObject<Block> CEILING = BLOCKS.register("ceiling", () -> new BlockCeiling(AbstractBlock.Properties.create(Material.IRON,
 			MaterialColor.QUARTZ).setRequiresTool().hardnessAndResistance(2f).setLightLevel(value -> 15)));
 	public static final RegistryObject<BlockItem> CEILING_ITEM = ITEMS.register("ceiling", () -> new BlockItem(CEILING.get(),
@@ -90,6 +83,8 @@ public class Registration {
 			new Item.Properties().group(ItemGroup.DECORATIONS)));
 	public static final RegistryObject<Block> ESCALATOR_SIDE = BLOCKS.register("esalator_side", BlockEscalatorSide::new);
 	public static final RegistryObject<Block> ESCALATOR_STEP = BLOCKS.register("esalator_side", BlockEscalatorStep::new);
+	public static final RegistryObject<Item> ESCALATOR_ITEM = ITEMS.register("escalator",
+			() -> new ItemEscalator(new Item.Properties().group(ItemGroup.TRANSPORTATION)));
 	public static final RegistryObject<Block> LOGO = BLOCKS.register("logo",
 			() -> new Block(AbstractBlock.Properties.create(Material.IRON).setRequiresTool().hardnessAndResistance(2f).setLightLevel(value -> 10)));
 	public static final RegistryObject<BlockItem> LOGO_ITEM = ITEMS.register("logo", () -> new BlockItem(LOGO.get(),
@@ -103,12 +98,18 @@ public class Registration {
 	public static final RegistryObject<BlockItem> PLATFORM_ITEM = ITEMS.register("platform", () -> new BlockItem(PLATFORM.get(),
 			new Item.Properties().group(ItemGroup.BUILDING_BLOCKS)));
 	public static final RegistryObject<Block> PLATFORM_RAIL = BLOCKS.register("platform_rail",
-			() -> new BlockPlatformRail(AbstractBlock.Properties.create(Material.IRON, MaterialColor.BROWN).hardnessAndResistance(2f).setOpaque((state, reader, blockPos) -> false)));
+			() -> new BlockPlatformRail(AbstractBlock.Properties.create(Material.IRON, MaterialColor.BROWN).hardnessAndResistance(2f).setOpaque((state, reader, pos) -> false)));
 	public static final RegistryObject<BlockItem> PLATFORM_RAIL_ITEM = ITEMS.register("platform_rail", () -> new BlockItem(PLATFORM_RAIL.get(),
 			new Item.Properties().group(ItemGroup.TRANSPORTATION)));
 	public static final RegistryObject<Block> PSD_DOOR = BLOCKS.register("psd_door", BlockPSDDoor::new);
+	public static final RegistryObject<Item> PSD_DOOR_ITEM = ITEMS.register("psd_door", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_DOOR,
+			ItemPSDAPGBase.EnumPSDAPGType.PSD));
 	public static final RegistryObject<Block> PSD_GLASS = BLOCKS.register("psd_glass", BlockPSDGlass::new);
+	public static final RegistryObject<Item> PSD_GLASS_ITEM = ITEMS.register("psd_glass", () -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS,
+			ItemPSDAPGBase.EnumPSDAPGType.PSD));
 	public static final RegistryObject<Block> PSD_GLASS_END = BLOCKS.register("psd_glass_end", BlockPSDGlassEnd::new);
+	public static final RegistryObject<Item> PSD_GLASS_END_ITEM = ITEMS.register("psd_glass_end",
+			() -> new ItemPSDAPGBase(ItemPSDAPGBase.EnumPSDAPGItem.PSD_APG_GLASS_END, ItemPSDAPGBase.EnumPSDAPGType.PSD));
 	public static final RegistryObject<Block> PSD_TOP = BLOCKS.register("psd_top", BlockPSDTop::new);
 	public static final RegistryObject<Block> STATION_COLOUR_ANDESITE = BLOCKS.register("station_color_andesite",
 			() -> new BlockStationColor(AbstractBlock.Properties.from(Blocks.ANDESITE)));
@@ -209,28 +210,26 @@ public class Registration {
 	public static final RegistryObject<BlockItem> STATION_NAME_TALL_WALL_ITEM = ITEMS.register("station_name_tall_wall",
 			() -> new BlockItem(STATION_NAME_TALL_WALL.get(), new Item.Properties().group(ItemGroup.DECORATIONS)));
 	public static final RegistryObject<Block> STATION_NAME_WALL = BLOCKS.register("station_name_wall",
-			() -> new BlockStationNameWall(AbstractBlock.Properties.create(Material.IRON).setRequiresTool().hardnessAndResistance(2f).setOpaque((state, reader, blockPos) -> false)));
+			() -> new BlockStationNameWall(AbstractBlock.Properties.create(Material.IRON).setRequiresTool().hardnessAndResistance(2f).setOpaque((state, reader, pos) -> false)));
 	public static final RegistryObject<BlockItem> STATION_NAME_WALL_ITEM = ITEMS.register("station_name_wall", () -> new BlockItem(STATION_NAME_WALL.get(),
 			new Item.Properties().group(ItemGroup.DECORATIONS)));
 	public static final RegistryObject<Block> STATION_POLE = BLOCKS.register("station_pole",
-			() -> new BlockStationPole(AbstractBlock.Properties.create(Material.ROCK).setRequiresTool().hardnessAndResistance(2f).setOpaque((state, reader, blockPos) -> false)));
+			() -> new BlockStationPole(AbstractBlock.Properties.create(Material.ROCK).setRequiresTool().hardnessAndResistance(2f).setOpaque((state, reader, pos) -> false)));
 	public static final RegistryObject<BlockItem> STATION_POLE_ITEM = ITEMS.register("station_pole", () -> new BlockItem(STATION_POLE.get(),
 			new Item.Properties().group(ItemGroup.DECORATIONS)));
 
-	public static final RegistryObject<TileEntityType<BlockClock.TileEntityClock>> CLOCK_TILE_ENTITY = TILE_ENTITIES.register("clock",
-			() -> TileEntityType.Builder.<BlockClock.TileEntityClock>create(BlockClock.TileEntityClock::new, CLOCK.get()));
-	public static final RegistryObject<TileEntityType<BlockPSDTop.TileEntityPSDTop>> PSD_TOP_TILE_ENTITY = TILE_ENTITIES.register("psd_top",
-			() -> TileEntityType.Builder.<BlockPSDTop.TileEntityPSDTop>create(BlockPSDTop.TileEntityPSDTop::new, PSD_TOP.get()));
-	public static final RegistryObject<TileEntityType<BlockAPGGlass.TileEntityAPGGlass>> APG_GLASS_TILE_ENTITY = TILE_ENTITIES.register("apg_glass",
-			() -> TileEntityType.Builder.<BlockAPGGlass.TileEntityAPGGlass>create(BlockAPGGlass.TileEntityAPGGlass::new, APG_GLASS.get()));
-	public static final RegistryObject<TileEntityType<BlockStationNameWall.TileEntityStationName>> STATION_NAME_WALL_TILE_ENTITY = TILE_ENTITIES.register("station_name_wall",
-			() -> TileEntityType.Builder.<BlockStationNameWall.TileEntityStationName>create(BlockStationNameWall.TileEntityStationName::new, STATION_NAME_WALL.get()));
-	public static final RegistryObject<TileEntityType<BlockStationNameTallBlock.TileEntityStationNameTallBlock>> STATION_NAME_TALL_BLOCK_TILE_ENTITY =
-			TILE_ENTITIES.register("station_name_tall_block",
-					() -> TileEntityType.Builder.<BlockStationNameTallBlock.TileEntityStationNameTallBlock>create(BlockStationNameTallBlock.TileEntityStationNameTallBlock::new, STATION_NAME_TALL_BLOCK.get()));
-	public static final RegistryObject<TileEntityType<BlockStationNameTallWall.TileEntityStationNameTallWall>> STATION_NAME_TALL_WALL_TILE_ENTITY =
-			TILE_ENTITIES.register("station_name_tall_wall",
-					() -> TileEntityType.Builder.<BlockStationNameTallWall.TileEntityStationNameTallWall>create(BlockStationNameTallWall.TileEntityStationNameTallWall::new, STATION_NAME_TALL_WALL.get()));
+	public static final RegistryObject<TileEntityType<ClockTileEntity>> CLOCK_TILE_ENTITY = TILE_ENTITIES.register("clock",
+			() -> TileEntityType.Builder.create(ClockTileEntity::new, CLOCK.get()).build(null));
+	public static final RegistryObject<TileEntityType<PSDTopTileEntity>> PSD_TOP_TILE_ENTITY = TILE_ENTITIES.register("psd_top",
+			() -> TileEntityType.Builder.create(PSDTopTileEntity::new, PSD_TOP.get()).build(null));
+	public static final RegistryObject<TileEntityType<APGGlassTileEntity>> APG_GLASS_TILE_ENTITY = TILE_ENTITIES.register("apg_glass",
+			() -> TileEntityType.Builder.create(APGGlassTileEntity::new, APG_GLASS.get()).build(null));
+	public static final RegistryObject<TileEntityType<StationNameTileEntity>> STATION_NAME_WALL_TILE_ENTITY = TILE_ENTITIES.register("station_name_wall",
+			() -> TileEntityType.Builder.create(StationNameTileEntity::new, STATION_NAME_WALL.get()).build(null));
+	public static final RegistryObject<TileEntityType<StationNameTallBlockTileEntity>> STATION_NAME_TALL_BLOCK_TILE_ENTITY = TILE_ENTITIES.register(
+			"station_name_tall_block", () -> TileEntityType.Builder.create(StationNameTallBlockTileEntity::new, STATION_NAME_TALL_BLOCK.get()).build(null));
+	public static final RegistryObject<TileEntityType<StationNameTallWallTileEntity>> STATION_NAME_TALL_WALL_TILE_ENTITY = TILE_ENTITIES.register(
+			"station_name_tall_wall", () -> TileEntityType.Builder.create(StationNameTallWallTileEntity::new, STATION_NAME_TALL_WALL.get()).build(null));
 
 	public static final RegistryObject<EntityType<EntityMinecart>> MINECART = ENTITIES.register("minecart",
 			() -> EntityType.Builder.<EntityMinecart>create(EntityMinecart::new, EntityClassification.MISC)

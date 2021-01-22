@@ -3,22 +3,22 @@ package com.spdfnerd.mtr.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.ActionResult;
+import net.minecraft.state.StateContainer;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 
 public abstract class BlockPSDAPGGlassBase extends BlockPSDAPGBase {
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
 		return IBlock.checkHoldingBrush(world, player, () -> {
 			for (int y = -1; y <= 1; y++) {
 				BlockState scanState = world.getBlockState(pos.up(y));
-				if (is(scanState.getBlock())) {
+				if (scanState.getBlock() == this) {
 					connectGlass(world, pos.up(y), scanState);
 				}
 			}
@@ -26,16 +26,16 @@ public abstract class BlockPSDAPGGlassBase extends BlockPSDAPGBase {
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(FACING, HALF, SIDE_EXTENDED);
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(HORIZONTAL_FACING, HALF, SIDE_EXTENDED);
 	}
 
 	private void connectGlass(World world, BlockPos pos, BlockState state) {
-		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
+		final Direction facing = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
 
-		final BlockPos leftPos = pos.offset(facing.rotateYCounterclockwise());
+		final BlockPos leftPos = pos.offset(facing.rotateYCCW());
 		final BlockState leftState = world.getBlockState(leftPos);
-		final boolean leftValid = is(leftState.getBlock());
+		final boolean leftValid = leftState.getBlock() == this;
 
 		if (leftValid) {
 			final EnumSide side = IBlock.getStatePropertySafe(leftState, SIDE_EXTENDED);
@@ -52,9 +52,9 @@ public abstract class BlockPSDAPGGlassBase extends BlockPSDAPGBase {
 			world.setBlockState(leftPos, leftState.with(SIDE_EXTENDED, newLeftSide));
 		}
 
-		final BlockPos rightPos = pos.offset(facing.rotateYClockwise());
+		final BlockPos rightPos = pos.offset(facing.rotateY());
 		final BlockState rightState = world.getBlockState(rightPos);
-		final boolean rightValid = is(rightState.getBlock());
+		final boolean rightValid = rightState.getBlock() == this;
 
 		if (rightValid) {
 			final EnumSide side = IBlock.getStatePropertySafe(rightState, SIDE_EXTENDED);
@@ -84,4 +84,5 @@ public abstract class BlockPSDAPGGlassBase extends BlockPSDAPGBase {
 
 		world.setBlockState(pos, state.with(SIDE_EXTENDED, newSide));
 	}
+
 }

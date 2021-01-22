@@ -1,48 +1,39 @@
 package com.spdfnerd.mtr.block;
 
-import com.spdfnerd.mtr.MTR;
+import com.spdfnerd.mtr.tileentity.StationNameTallBlockTileEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.Pair;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
+
+import javax.annotation.Nullable;
 
 public class BlockStationNameTallBlock extends BlockStationNameTallBase {
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		final Pair<Integer, Integer> bounds = getBounds(state);
-		return VoxelShapes.union(getVoxelShapeByDirection(2, bounds.getLeft(), 5, 14, bounds.getRight(), 11, IBlock.getStatePropertySafe(state, FACING)), BlockStationPole.getStationPoleShape());
+	public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+		final Tuple<Integer, Integer> bounds = getBounds(state);
+		return VoxelShapes.or(IBlock.getVoxelShapeByDirection(2, bounds.getA(), 5, 14, bounds.getB(), 11, IBlock.getStatePropertySafe(state, HORIZONTAL_FACING)),
+				BlockStationPole.getStationPoleShape());
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return isReplaceable(ctx, Direction.UP, 3) ? getDefaultState().with(FACING, ctx.getPlayerFacing()).with(METAL, true).with(THIRD, EnumThird.LOWER) : null;
+	public BlockState getStateForPlacement(BlockItemUseContext ctx) {
+		return IBlock.isReplaceable(ctx, Direction.UP, 3) ?
+				getDefaultState().with(HORIZONTAL_FACING, ctx.getPlayer().getHorizontalFacing()).with(METAL, true).with(THIRD,
+				EnumThird.LOWER) : null;
 	}
 
+	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new TileEntityStationNameTallBlock();
+	public TileEntity createNewTileEntity(IBlockReader worldIn) {
+		return new StationNameTallBlockTileEntity();
 	}
 
-	public static class TileEntityStationNameTallBlock extends TileEntityStationNameBase {
-
-		public TileEntityStationNameTallBlock() {
-			super(MTR.STATION_NAME_TALL_BLOCK_TILE_ENTITY, true, false, 80, 0.25F, 0.6875F);
-		}
-
-		@Override
-		public boolean shouldRender() {
-			if (world == null) {
-				return false;
-			}
-			final BlockState state = world.getBlockState(pos);
-			return state.getBlock() instanceof BlockStationNameTallBlock && IBlock.getStatePropertySafe(state, THIRD) == EnumThird.MIDDLE;
-		}
-	}
 }

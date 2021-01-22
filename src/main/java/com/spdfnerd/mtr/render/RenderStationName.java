@@ -39,7 +39,7 @@ public class RenderStationName<T extends BlockStationNameBase.TileEntityStationN
 		final BlockState state = world.getBlockState(pos);
 		final Direction facing = IBlock.getStatePropertySafe(state, BlockStationNameBase.FACING);
 		final int color;
-		switch (IBlock.getStatePropertySafe(state, BlockStationNameBase.COLOR)) {
+		switch (IBlock.getStatePropertySafe(state, BlockStationNameBase.COLOUR)) {
 			case 0:
 				color = ARGB_WHITE;
 				break;

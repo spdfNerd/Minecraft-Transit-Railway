@@ -1,55 +1,53 @@
 package com.spdfnerd.mtr.block;
 
-import com.spdfnerd.mtr.MTR;
+import com.spdfnerd.mtr.setup.Registration;
+import com.spdfnerd.mtr.tileentity.APGGlassTileEntity;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.DoubleBlockHalf;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.ActionResult;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.SlabType;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public class BlockAPGGlass extends BlockPSDAPGGlassBase implements BlockEntityProvider, IPropagateBlock {
+import javax.annotation.Nullable;
+
+public class BlockAPGGlass extends BlockPSDAPGGlassBase implements ITileEntityProvider, IPropagateBlock {
 
 	@Override
 	public Item asItem() {
-		return Items.APG_GLASS;
+		return Registration.APG_GLASS_ITEM.get();
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (IBlock.getStatePropertySafe(state, HALF) == DoubleBlockHalf.UPPER) {
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+		if (IBlock.getStatePropertySafe(state, HALF) == SlabType.TOP) {
 			return IBlock.checkHoldingBrush(world, player, () -> {
-				world.setBlockState(pos, state.cycle(PROPAGATE_PROPERTY));
-				propagate(world, pos, IBlock.getStatePropertySafe(state, FACING).rotateYClockwise());
-				propagate(world, pos, IBlock.getStatePropertySafe(state, FACING).rotateYCounterclockwise());
+				world.setBlockState(pos, state.func_235896_a_(PROPAGATE_PROPERTY));
+				propagate(world, pos, IBlock.getStatePropertySafe(state, HORIZONTAL_FACING).rotateY());
+				propagate(world, pos, IBlock.getStatePropertySafe(state, HORIZONTAL_FACING).rotateYCCW());
 			});
 		} else {
-			return super.onUse(state, world, pos, player, hand, hit);
+			return super.onBlockActivated(state, world, pos, player, hand, hit);
 		}
 	}
 
+	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new TileEntityAPGGlass();
+	public TileEntity createNewTileEntity(IBlockReader worldIn) {
+		return new APGGlassTileEntity();
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(FACING, HALF, SIDE_EXTENDED, PROPAGATE_PROPERTY);
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(HORIZONTAL_FACING, HALF, SIDE_EXTENDED, PROPAGATE_PROPERTY);
 	}
 
-	public static class TileEntityAPGGlass extends BlockEntity {
-
-		public TileEntityAPGGlass() {
-			super(MTR.APG_GLASS_TILE_ENTITY);
-		}
-	}
 }

@@ -1,33 +1,38 @@
 package com.spdfnerd.mtr.block;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.ActionResult;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
-import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+
+import javax.annotation.Nullable;
 
 public abstract class BlockStationNameTallBase extends BlockStationNameBase implements IBlock {
 
-	public static final BooleanProperty METAL = BooleanProperty.of("metal");
+	public static final BooleanProperty METAL = BooleanProperty.create("metal");
 
 	public BlockStationNameTallBase() {
-		super(FabricBlockSettings.of(Material.METAL, MaterialColor.IRON).requiresTool().hardness(2).nonOpaque());
+		super(AbstractBlock.Properties.create(Material.IRON).setRequiresTool().hardnessAndResistance(2).setOpaque((state, reader, pos) -> false));
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
 		return IBlock.checkHoldingBrush(world, player, () -> {
-			final boolean isWhite = IBlock.getStatePropertySafe(state, COLOR) == 0;
+			final boolean isWhite = IBlock.getStatePropertySafe(state, COLOUR) == 0;
 			final int newColorProperty = isWhite ? 2 : 0;
 			final boolean newMetalProperty = isWhite == IBlock.getStatePropertySafe(state, METAL);
 
@@ -50,8 +55,8 @@ public abstract class BlockStationNameTallBase extends BlockStationNameBase impl
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		if ((direction == Direction.UP && IBlock.getStatePropertySafe(state, THIRD) != EnumThird.UPPER || direction == Direction.DOWN && IBlock.getStatePropertySafe(state, THIRD) != EnumThird.LOWER) && !newState.isOf(this)) {
+	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {
+		if ((facing == Direction.UP && IBlock.getStatePropertySafe(state, THIRD) != EnumThird.UPPER || facing == Direction.DOWN && IBlock.getStatePropertySafe(state, THIRD) != EnumThird.LOWER) && !(facingState.getBlock() == this)) {
 			return Blocks.AIR.getDefaultState();
 		} else {
 			return state;
@@ -59,7 +64,7 @@ public abstract class BlockStationNameTallBase extends BlockStationNameBase impl
 	}
 
 	@Override
-	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+	public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		switch (IBlock.getStatePropertySafe(state, THIRD)) {
 			case MIDDLE:
 				IBlock.onBreakCreative(world, player, pos.down());
@@ -68,26 +73,26 @@ public abstract class BlockStationNameTallBase extends BlockStationNameBase impl
 				IBlock.onBreakCreative(world, player, pos.down(2));
 				break;
 		}
-		super.onBreak(world, pos, state, player);
+		super.onBlockHarvested(world, pos, state, player);
 	}
 
 	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		if (!world.isClient) {
-			final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-			world.setBlockState(pos.up(), getDefaultState().with(FACING, facing).with(METAL, true).with(THIRD, EnumThird.MIDDLE), 3);
-			world.setBlockState(pos.up(2), getDefaultState().with(FACING, facing).with(METAL, true).with(THIRD, EnumThird.UPPER), 3);
-			world.updateNeighbors(pos, Blocks.AIR);
-			state.updateNeighbors(world, pos, 3);
+	public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+		if (!world.isRemote) {
+			final Direction facing = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
+			world.setBlockState(pos.up(), getDefaultState().with(HORIZONTAL_FACING, facing).with(METAL, true).with(THIRD, EnumThird.MIDDLE), 3);
+			world.setBlockState(pos.up(2), getDefaultState().with(HORIZONTAL_FACING, facing).with(METAL, true).with(THIRD, EnumThird.UPPER), 3);
+			world.func_230547_a_(pos, Blocks.AIR);
+			state.updateNeighbours(world, pos, 3);
 		}
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(COLOR, FACING, METAL, THIRD);
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(COLOUR, HORIZONTAL_FACING, METAL, THIRD);
 	}
 
-	protected static Pair<Integer, Integer> getBounds(BlockState state) {
+	protected static Tuple<Integer, Integer> getBounds(BlockState state) {
 		final EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
 		final int start, end;
 		switch (third) {
@@ -104,10 +109,11 @@ public abstract class BlockStationNameTallBase extends BlockStationNameBase impl
 				end = 16;
 				break;
 		}
-		return new Pair<>(start, end);
+		return new Tuple<>(start, end);
 	}
 
 	private static void updateProperties(World world, BlockPos pos, boolean metalProperty, int colorProperty) {
-		world.setBlockState(pos, world.getBlockState(pos).with(COLOR, colorProperty).with(METAL, metalProperty));
+		world.setBlockState(pos, world.getBlockState(pos).with(COLOUR, colorProperty).with(METAL, metalProperty));
 	}
+
 }

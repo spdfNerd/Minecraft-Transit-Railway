@@ -3,66 +3,66 @@ package com.spdfnerd.mtr.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.SlabType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 
 public abstract class BlockPSDAPGGlassEndBase extends BlockPSDAPGGlassBase {
 
-	public static final EnumProperty<EnumPSDAPGGlassEndSide> TOUCHING_LEFT = EnumProperty.of("touching_left", EnumPSDAPGGlassEndSide.class);
-	public static final EnumProperty<EnumPSDAPGGlassEndSide> TOUCHING_RIGHT = EnumProperty.of("touching_right", EnumPSDAPGGlassEndSide.class);
+	public static final EnumProperty<EnumPSDAPGGlassEndSide> TOUCHING_LEFT = EnumProperty.create("touching_left", EnumPSDAPGGlassEndSide.class);
+	public static final EnumProperty<EnumPSDAPGGlassEndSide> TOUCHING_RIGHT = EnumProperty.create("touching_right", EnumPSDAPGGlassEndSide.class);
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState newState, WorldAccess world, BlockPos pos, BlockPos posFrom) {
-		BlockState superState = super.getStateForNeighborUpdate(state, direction, newState, world, pos, posFrom);
+	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {
+		BlockState superState = super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);
 		if (superState.getBlock() == Blocks.AIR) {
 			return superState;
 		} else {
-			final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-			final EnumPSDAPGGlassEndSide touchingLeft = getSideEnd(world, pos, facing.rotateYCounterclockwise());
-			final EnumPSDAPGGlassEndSide touchingRight = getSideEnd(world, pos, facing.rotateYClockwise());
+			final Direction direction = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
+			final EnumPSDAPGGlassEndSide touchingLeft = getSideEnd(world, currentPos, direction.rotateYCCW());
+			final EnumPSDAPGGlassEndSide touchingRight = getSideEnd(world, currentPos, direction.rotateY());
 			return superState.with(TOUCHING_LEFT, touchingLeft).with(TOUCHING_RIGHT, touchingRight);
 		}
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		VoxelShape superShape = super.getOutlineShape(state, world, pos, context);
+	public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+		VoxelShape superShape = super.getShape(state, world, pos, context);
 		final boolean leftAir = IBlock.getStatePropertySafe(state, TOUCHING_LEFT) == EnumPSDAPGGlassEndSide.AIR;
 		final boolean rightAir = IBlock.getStatePropertySafe(state, TOUCHING_RIGHT) == EnumPSDAPGGlassEndSide.AIR;
-		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-		final double height = isAPG() && IBlock.getStatePropertySafe(state, HALF) == DoubleBlockHalf.UPPER ? 9 : 16;
+		final Direction facing = IBlock.getStatePropertySafe(state, HORIZONTAL_FACING);
+		final double height = isAPG() && IBlock.getStatePropertySafe(state, HALF) == SlabType.TOP ? 9 : 16;
 
 		if (facing == Direction.NORTH && leftAir || facing == Direction.SOUTH && rightAir) {
-			superShape = VoxelShapes.union(superShape, Block.createCuboidShape(0, 0, 0, 4, height, 16));
+			superShape = VoxelShapes.or(superShape, Block.makeCuboidShape(0, 0, 0, 4, height, 16));
 		}
 		if (facing == Direction.EAST && leftAir || facing == Direction.WEST && rightAir) {
-			superShape = VoxelShapes.union(superShape, Block.createCuboidShape(0, 0, 0, 16, height, 4));
+			superShape = VoxelShapes.or(superShape, Block.makeCuboidShape(0, 0, 0, 16, height, 4));
 		}
 		if (facing == Direction.SOUTH && leftAir || facing == Direction.NORTH && rightAir) {
-			superShape = VoxelShapes.union(superShape, Block.createCuboidShape(12, 0, 0, 16, height, 16));
+			superShape = VoxelShapes.or(superShape, Block.makeCuboidShape(12, 0, 0, 16, height, 16));
 		}
 		if (facing == Direction.WEST && leftAir || facing == Direction.EAST && rightAir) {
-			superShape = VoxelShapes.union(superShape, Block.createCuboidShape(0, 0, 12, 16, height, 16));
+			superShape = VoxelShapes.or(superShape, Block.makeCuboidShape(0, 0, 12, 16, height, 16));
 		}
 
 		return superShape;
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(FACING, HALF, SIDE_EXTENDED, TOUCHING_LEFT, TOUCHING_RIGHT);
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+		builder.add(HORIZONTAL_FACING, HALF, SIDE_EXTENDED, TOUCHING_LEFT, TOUCHING_RIGHT);
 	}
 
-	private EnumPSDAPGGlassEndSide getSideEnd(BlockView world, BlockPos pos, Direction offset) {
+	private EnumPSDAPGGlassEndSide getSideEnd(IBlockReader world, BlockPos pos, Direction offset) {
 		final BlockPos checkPos = pos.offset(offset);
 		if (world.getBlockState(checkPos).getBlock() instanceof BlockPSDAPGDoorBase) {
 			return EnumPSDAPGGlassEndSide.DOOR;
@@ -73,7 +73,7 @@ public abstract class BlockPSDAPGGlassEndBase extends BlockPSDAPGGlassBase {
 		}
 	}
 
-	public enum EnumPSDAPGGlassEndSide implements StringIdentifiable {
+	public enum EnumPSDAPGGlassEndSide implements IStringSerializable {
 
 		AIR("air"), DOOR("door"), NONE("none");
 		private final String name;
@@ -83,8 +83,9 @@ public abstract class BlockPSDAPGGlassEndBase extends BlockPSDAPGGlassBase {
 		}
 
 		@Override
-		public String asString() {
+		public String getString() {
 			return name;
 		}
+
 	}
 }
