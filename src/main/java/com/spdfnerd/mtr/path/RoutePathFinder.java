@@ -4,7 +4,7 @@ import com.spdfnerd.mtr.block.BlockPlatformRail;
 import com.spdfnerd.mtr.data.Platform;
 import com.spdfnerd.mtr.data.Pos3f;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.IWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public class RoutePathFinder extends PathFinderBase {
 
 	private final int trimStart;
 
-	public RoutePathFinder(WorldAccess world, Platform platformStart, Platform platformDestination) {
+	public RoutePathFinder(IWorld world, Platform platformStart, Platform platformDestination) {
 		super(world, platformStart.getMidPos(), platformDestination.getMidPos());
 		trimStart = platformStart.getLength() / 2 + 1;
 	}

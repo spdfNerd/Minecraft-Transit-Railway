@@ -56,7 +56,7 @@ public class Pos3f {
 	public void normalize() {
 		final double lengthSquared = lengthSquared();
 		if (lengthSquared >= 1.0E-5) {
-			final double length = MathHelper.fastInverseSqrt(lengthSquared);
+			final double length = MathHelper.fastInvSqrt(lengthSquared);
 			x *= length;
 			y *= length;
 			z *= length;
@@ -79,4 +79,5 @@ public class Pos3f {
 	public String toString() {
 		return "[" + x + ", " + y + ", " + z + "]";
 	}
+
 }

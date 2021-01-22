@@ -1,9 +1,9 @@
 package com.spdfnerd.mtr.data;
 
 import com.spdfnerd.mtr.path.RoutePathFinder;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.IWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public final class Route extends DataBase {
 		platformIds = new ArrayList<>();
 	}
 
-	public Route(CompoundTag tag) {
+	public Route(CompoundNBT tag) {
 		super(tag);
 		platformIds = new ArrayList<>();
 		final long[] platformIdsArray = tag.getLongArray(KEY_PLATFORM_IDS);
@@ -29,7 +29,7 @@ public final class Route extends DataBase {
 		}
 	}
 
-	public Route(PacketByteBuf packet) {
+	public Route(PacketBuffer packet) {
 		super(packet);
 		platformIds = new ArrayList<>();
 		final int platformCount = packet.readInt();
@@ -39,14 +39,14 @@ public final class Route extends DataBase {
 	}
 
 	@Override
-	public CompoundTag toCompoundTag() {
-		final CompoundTag tag = super.toCompoundTag();
+	public CompoundNBT toCompoundNBT() {
+		final CompoundNBT tag = super.toCompoundNBT();
 		tag.putLongArray(KEY_PLATFORM_IDS, platformIds);
 		return tag;
 	}
 
 	@Override
-	public void writePacket(PacketByteBuf packet) {
+	public void writePacket(PacketBuffer packet) {
 		super.writePacket(packet);
 		packet.writeInt(platformIds.size());
 		for (final long platformId : platformIds) {
@@ -54,7 +54,7 @@ public final class Route extends DataBase {
 		}
 	}
 
-	public List<List<Pos3f>> getPath(WorldAccess world, Set<Platform> platforms, Platform firstPlatform) {
+	public List<List<Pos3f>> getPath(IWorld world, Set<Platform> platforms, Platform firstPlatform) {
 		final List<List<Pos3f>> paths = new ArrayList<>();
 		for (int i = -1; i < platformIds.size() - 1; i++) {
 			final Platform platformStart = i < 0 ? firstPlatform : RailwayData.getDataById(platforms, platformIds.get(i));
@@ -68,4 +68,5 @@ public final class Route extends DataBase {
 		}
 		return paths;
 	}
+
 }

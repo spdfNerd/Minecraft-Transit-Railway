@@ -1,12 +1,11 @@
 package com.spdfnerd.mtr.data;
 
 import com.spdfnerd.mtr.entity.*;
-import mtr.entity.*;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class Train extends DataBase {
 		paths = new ArrayList<>();
 	}
 
-	public Train(CompoundTag tag) {
+	public Train(CompoundNBT tag) {
 		super(tag);
 		trainType = TrainType.values()[tag.getInt(KEY_TRAIN_TYPE)];
 		name = getName();
@@ -89,7 +88,7 @@ public final class Train extends DataBase {
 		}
 	}
 
-	public Train(PacketByteBuf packet) {
+	public Train(PacketBuffer packet) {
 		super(packet);
 		trainType = TrainType.values()[packet.readInt()];
 		name = getName();
@@ -124,8 +123,8 @@ public final class Train extends DataBase {
 	}
 
 	@Override
-	public CompoundTag toCompoundTag() {
-		final CompoundTag tag = super.toCompoundTag();
+	public CompoundNBT toCompoundNBT() {
+		final CompoundNBT tag = super.toCompoundNBT();
 		tag.putInt(KEY_TRAIN_TYPE, trainType.ordinal());
 
 		final int trainLength = posX.length;
@@ -157,7 +156,7 @@ public final class Train extends DataBase {
 	}
 
 	@Override
-	public void writePacket(PacketByteBuf packet) {
+	public void writePacket(PacketBuffer packet) {
 		super.writePacket(packet);
 
 		packet.writeInt(trainType.ordinal());
@@ -253,7 +252,7 @@ public final class Train extends DataBase {
 		}
 
 		public String getName() {
-			return new TranslatableText("train.mtr." + toString()).getString();
+			return new StringTextComponent("train.mtr." + toString()).getString();
 		}
 
 		public int getColor() {
@@ -292,4 +291,5 @@ public final class Train extends DataBase {
 			EntityTrainBase create(World world, double x, double y, double z);
 		}
 	}
+
 }

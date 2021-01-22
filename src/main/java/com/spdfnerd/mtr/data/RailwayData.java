@@ -6,18 +6,18 @@ import com.spdfnerd.mtr.packet.PacketTrainDataGuiServer;
 import com.spdfnerd.mtr.path.PathFinderBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.PersistentState;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.*;
 
-public class RailwayData extends PersistentState {
+public class RailwayData extends WorldSavedData {
 
 	public static final int STATION_COOL_DOWN = 120;
 	public static final int TRAIN_STOP_TIME = 20;
@@ -44,24 +44,24 @@ public class RailwayData extends PersistentState {
 	}
 
 	@Override
-	public void fromTag(CompoundTag tag) {
-		final CompoundTag tagStations = tag.getCompound(KEY_STATIONS);
-		for (String key : tagStations.getKeys()) {
+	public void read(CompoundNBT compound) {
+		final CompoundNBT tagStations = compound.getCompound(KEY_STATIONS);
+		for (String key : tagStations.keySet()) {
 			stations.add(new Station(tagStations.getCompound(key)));
 		}
 
-		final CompoundTag tagNewPlatforms = tag.getCompound(KEY_PLATFORMS);
-		for (String key : tagNewPlatforms.getKeys()) {
+		final CompoundNBT tagNewPlatforms = compound.getCompound(KEY_PLATFORMS);
+		for (String key : tagNewPlatforms.keySet()) {
 			platforms.add(new Platform(tagNewPlatforms.getCompound(key)));
 		}
 
-		final CompoundTag tagNewRoutes = tag.getCompound(KEY_ROUTES);
-		for (String key : tagNewRoutes.getKeys()) {
+		final CompoundNBT tagNewRoutes = compound.getCompound(KEY_ROUTES);
+		for (String key : tagNewRoutes.keySet()) {
 			routes.add(new Route(tagNewRoutes.getCompound(key)));
 		}
 
-		final CompoundTag tagNewTrains = tag.getCompound(KEY_TRAINS);
-		for (String key : tagNewTrains.getKeys()) {
+		final CompoundNBT tagNewTrains = compound.getCompound(KEY_TRAINS);
+		for (String key : tagNewTrains.keySet()) {
 			trains.add(new Train(tagNewTrains.getCompound(key)));
 		}
 
@@ -69,48 +69,48 @@ public class RailwayData extends PersistentState {
 	}
 
 	@Override
-	public CompoundTag toTag(CompoundTag tag) {
+	public CompoundNBT write(CompoundNBT compound) {
 		validateData();
-		final CompoundTag tagStations = new CompoundTag();
+		final CompoundNBT tagStations = new CompoundNBT();
 		int i = 0;
 		for (Station station : stations) {
-			tagStations.put(KEY_STATIONS + i, station.toCompoundTag());
+			tagStations.put(KEY_STATIONS + i, station.toCompoundNBT());
 			i++;
 		}
-		tag.put(KEY_STATIONS, tagStations);
+		compound.put(KEY_STATIONS, tagStations);
 
-		final CompoundTag tagNewPlatforms = new CompoundTag();
+		final CompoundNBT tagNewPlatforms = new CompoundNBT();
 		int j = 0;
 		for (Platform platform : platforms) {
-			tagNewPlatforms.put(KEY_PLATFORMS + j, platform.toCompoundTag());
+			tagNewPlatforms.put(KEY_PLATFORMS + j, platform.toCompoundNBT());
 			j++;
 		}
-		tag.put(KEY_PLATFORMS, tagNewPlatforms);
+		compound.put(KEY_PLATFORMS, tagNewPlatforms);
 
-		final CompoundTag tagNewRoutes = new CompoundTag();
+		final CompoundNBT tagNewRoutes = new CompoundNBT();
 		int k = 0;
 		for (Route route : routes) {
-			tagNewRoutes.put(KEY_ROUTES + k, route.toCompoundTag());
+			tagNewRoutes.put(KEY_ROUTES + k, route.toCompoundNBT());
 			k++;
 		}
-		tag.put(KEY_ROUTES, tagNewRoutes);
+		compound.put(KEY_ROUTES, tagNewRoutes);
 
-		final CompoundTag tagNewTrains = new CompoundTag();
+		final CompoundNBT tagNewTrains = new CompoundNBT();
 		int l = 0;
 		for (Train train : trains) {
-			tagNewTrains.put(KEY_TRAINS + l, train.toCompoundTag());
+			tagNewTrains.put(KEY_TRAINS + l, train.toCompoundNBT());
 			l++;
 		}
-		tag.put(KEY_TRAINS, tagNewTrains);
+		compound.put(KEY_TRAINS, tagNewTrains);
 
-		return tag;
+		return compound;
 	}
 
 	public Set<Station> getStations() {
 		return stations;
 	}
 
-	public void checkPlatformPos(WorldAccess world, BlockPos pos) {
+	public void checkPlatformPos(IWorld world, BlockPos pos) {
 		validatePlatforms(world);
 		final Platform newPlatform = BlockPlatformRail.createNewPlatform(world, pos);
 		if (newPlatform != null && platforms.stream().noneMatch(platform -> platform.getPos1().equals(newPlatform.getPos1()))) {
@@ -118,7 +118,7 @@ public class RailwayData extends PersistentState {
 		}
 	}
 
-	public Set<Platform> getPlatforms(WorldAccess world) {
+	public Set<Platform> getPlatforms(IWorld world) {
 		validatePlatforms(world);
 		return platforms;
 	}
@@ -128,8 +128,8 @@ public class RailwayData extends PersistentState {
 		return routes;
 	}
 
-	public void simulateTrains(WorldAccess world) {
-		final int worldTime = (int) (world.getLunarTime() + 6000) % (Platform.HOURS_IN_DAY * Platform.TICKS_PER_HOUR);
+	public void simulateTrains(IWorld world) {
+		final int worldTime = (int) (world.func_241851_ab() + 6000) % (Platform.HOURS_IN_DAY * Platform.TICKS_PER_HOUR);
 		final Set<Train> trainsToRemove = new HashSet<>();
 
 		trains.forEach(train -> {
@@ -156,7 +156,7 @@ public class RailwayData extends PersistentState {
 					train.stationCoolDown = 0;
 				}
 			} else {
-				if (MathHelper.square(train.speed) >= 2 * train.trainType.getAcceleration() * (distanceRemaining - 1)) {
+				if (MathHelper.squareFloat(train.speed) >= 2 * train.trainType.getAcceleration() * (distanceRemaining - 1)) {
 					if (train.speed >= train.trainType.getAcceleration() * 2) {
 						train.speed -= train.trainType.getAcceleration();
 					} else {
@@ -171,7 +171,7 @@ public class RailwayData extends PersistentState {
 						final Pos3f newPos = train.paths.get(0).get(train.pathIndex[i]);
 						final Pos3f movement = new Pos3f(newPos.getX() - train.posX[i], newPos.getY() - train.posY[i], newPos.getZ() - train.posZ[i]);
 
-						if (movement.lengthSquared() < MathHelper.square(2 * train.speed)) {
+						if (movement.lengthSquared() < MathHelper.squareFloat(2 * train.speed)) {
 							train.pathIndex[i]++;
 						}
 
@@ -189,7 +189,8 @@ public class RailwayData extends PersistentState {
 				final float xAverage = (train.posX[i] + train.posX[i + 1]) / 2;
 				final float yAverage = (train.posY[i] + train.posY[i + 1]) / 2;
 				final float zAverage = (train.posZ[i] + train.posZ[i + 1]) / 2;
-				final boolean playerNearby = players.stream().anyMatch(player -> PathFinderBase.distanceSquaredBetween(new BlockPos(xAverage, yAverage, zAverage), player.getBlockPos()) < VIEW_DISTANCE_SQUARED);
+				final boolean playerNearby = players.stream().anyMatch(player -> PathFinderBase.distanceSquaredBetween(new BlockPos(xAverage, yAverage,
+						zAverage), player.getPosition()) < VIEW_DISTANCE_SQUARED);
 
 				final boolean spawnTrain;
 				if (playerNearby && train.entities[i] == null) {
@@ -204,21 +205,21 @@ public class RailwayData extends PersistentState {
 						final float yaw = (float) Math.toDegrees(MathHelper.atan2(train.posX[i + 1] - train.posX[i], train.posZ[i + 1] - train.posZ[i]));
 						final float pitch = (float) Math.toDegrees(Math.asin((train.posY[i + 1] - train.posY[i]) / train.trainType.getSpacing()));
 						final EntityTrainBase trainEntity = train.entities[i];
-						final double prevTrainX = trainEntity.getX();
-						final double prevTrainZ = trainEntity.getZ();
+						final double prevTrainX = trainEntity.getPosX();
+						final double prevTrainZ = trainEntity.getPosZ();
 
-						trainEntity.updatePositionAndAngles(xAverage, yAverage, zAverage, yaw, pitch);
+						trainEntity.setPositionAndRotation(xAverage, yAverage, zAverage, yaw, pitch);
 						trainEntity.stationCoolDown = train.stationCoolDown;
 
 						final float motionYaw = (float) Math.toDegrees(MathHelper.atan2(xAverage - prevTrainX, zAverage - prevTrainZ));
-						trainEntity.setHead1IsFront(MathHelper.angleBetween(yaw, motionYaw) < 90);
+						trainEntity.setHead1IsFront(MathHelper.degreesDifferenceAbs(yaw, motionYaw) < 90);
 					} else {
-						train.entities[i].kill();
+						train.entities[i].onKillCommand();
 						train.entities[i] = null;
 					}
 				}
 				if (spawnTrain) {
-					world.spawnEntity(train.entities[i]);
+					world.addEntity(train.entities[i]);
 				}
 			}
 		});
@@ -226,7 +227,7 @@ public class RailwayData extends PersistentState {
 		trainsToRemove.forEach(this::removeTrain);
 		PacketTrainDataGuiServer.sendTrainsS2C(world, trains);
 
-		if (world.getLevelProperties().getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).get()) {
+		if (world.getWorldInfo().getGameRulesInstance().get(GameRules.DO_DAYLIGHT_CYCLE).get()) {
 			platforms.forEach(platform -> {
 				final Train newTrain = platform.createTrainOnPlatform(world, platforms, routes, worldTime);
 				if (newTrain != null) {
@@ -248,20 +249,20 @@ public class RailwayData extends PersistentState {
 		validateData();
 	}
 
-	public void setData(WorldAccess world, Platform newPlatform) {
+	public void setData(IWorld world, Platform newPlatform) {
 		platforms.removeIf(platform -> platform.getPos1().equals(newPlatform.getPos1()));
 		platforms.add(newPlatform);
 		validatePlatforms(world);
 	}
 
 	private void removeTrain(Train train) {
-		Arrays.stream(train.entities).filter(Objects::nonNull).forEach(Entity::kill);
+		Arrays.stream(train.entities).filter(Objects::nonNull).forEach(Entity::onKillCommand);
 		trains.remove(train);
 	}
 
 	// validation
 
-	private void validatePlatforms(WorldAccess world) {
+	private void validatePlatforms(IWorld world) {
 		platforms.forEach(platform -> platform.updateDimensions(world));
 		platforms.removeIf(platform -> !(world.getBlockState(platform.getMidPos()).getBlock() instanceof BlockPlatformRail));
 
@@ -310,9 +311,10 @@ public class RailwayData extends PersistentState {
 
 	public static RailwayData getInstance(World world) {
 		if (world instanceof ServerWorld) {
-			return ((ServerWorld) world).getPersistentStateManager().getOrCreate(RailwayData::new, NAME);
+			return ((ServerWorld) world).getSavedData().getOrCreate(RailwayData::new, NAME);
 		} else {
 			return null;
 		}
 	}
+
 }

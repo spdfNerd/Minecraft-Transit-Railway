@@ -318,7 +318,7 @@ public class DashboardScreen extends Screen implements IGui {
 	}
 
 	private static void sendUpdate() {
-		PacketTrainDataGuiClient.sendStationsAndRoutesC2S(ClientData.stations, ClientData.routes);
+		PacketTrainDataGuiClient.cSendStationsAndRoutes(ClientData.stations, ClientData.routes);
 	}
 
 	private static int colorStringToInt(String string) {

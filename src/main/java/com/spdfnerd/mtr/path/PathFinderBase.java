@@ -4,11 +4,11 @@ import com.spdfnerd.mtr.block.IBlock;
 import com.spdfnerd.mtr.data.Pos3f;
 import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.RailShape;
+import net.minecraft.state.properties.RailShape;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.IWorld;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,14 +18,14 @@ import java.util.stream.Stream;
 
 public abstract class PathFinderBase {
 
-	protected final WorldAccess world;
+	protected final IWorld world;
 	protected final BlockPos destination;
 	protected final List<BlockPos> path;
 	protected final Set<BlockPos> blacklist;
 
 	protected static final int SMOOTHING_RADIUS = 2;
 
-	protected PathFinderBase(WorldAccess world, BlockPos start, BlockPos destination) {
+	protected PathFinderBase(IWorld world, BlockPos start, BlockPos destination) {
 		this.world = world;
 		this.destination = destination;
 		path = new ArrayList<>();
@@ -125,7 +125,7 @@ public abstract class PathFinderBase {
 	}
 
 	public static float distanceSquaredBetween(float x1, float y1, float z1, float x2, float y2, float z2) {
-		return MathHelper.square(x1 - x2) + MathHelper.square(y1 - y2) + MathHelper.square(z1 - z2);
+		return MathHelper.squareFloat(x1 - x2) + MathHelper.squareFloat(y1 - y2) + MathHelper.squareFloat(z1 - z2);
 	}
 
 	protected static class BlockPosWeighted implements Comparable<BlockPosWeighted> {

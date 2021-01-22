@@ -270,7 +270,7 @@ public class PlatformScreen extends Screen implements IGui {
 	}
 
 	private void sendUpdate() {
-		PacketTrainDataGuiClient.sendPlatformC2S(getPlatform());
+		PacketTrainDataGuiClient.cSendPlatform(getPlatform());
 	}
 
 	private static String getSliderString(int value) {

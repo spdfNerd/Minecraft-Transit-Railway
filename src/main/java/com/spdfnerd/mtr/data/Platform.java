@@ -1,11 +1,11 @@
 package com.spdfnerd.mtr.data;
 
 import com.spdfnerd.mtr.block.BlockPlatformRail;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.IWorld;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -54,7 +54,7 @@ public final class Platform extends DataBase {
 		schedule = new ArrayList<>();
 	}
 
-	public Platform(CompoundTag tag) {
+	public Platform(CompoundNBT tag) {
 		super(tag);
 		pos = BlockPos.fromLong(tag.getLong(KEY_POS));
 		axis = tag.getBoolean(KEY_AXIS) ? Direction.Axis.X : Direction.Axis.Z;
@@ -79,7 +79,7 @@ public final class Platform extends DataBase {
 		shuffleTrains = tag.getBoolean(KEY_SHUFFLE_TRAINS);
 	}
 
-	public Platform(PacketByteBuf packet) {
+	public Platform(PacketBuffer packet) {
 		super(packet);
 		pos = packet.readBlockPos();
 		axis = packet.readBoolean() ? Direction.Axis.X : Direction.Axis.Z;
@@ -97,7 +97,7 @@ public final class Platform extends DataBase {
 			trainTypes.add(Train.TrainType.values()[packet.readInt()]);
 		}
 
-		frequencies = packet.readIntArray();
+		frequencies = packet.readVarIntArray();
 		generateSchedule();
 
 		shuffleRoutes = packet.readBoolean();
@@ -105,9 +105,9 @@ public final class Platform extends DataBase {
 	}
 
 	@Override
-	public CompoundTag toCompoundTag() {
-		final CompoundTag tag = super.toCompoundTag();
-		tag.putLong(KEY_POS, pos.asLong());
+	public CompoundNBT toCompoundNBT() {
+		final CompoundNBT tag = super.toCompoundNBT();
+		tag.putLong(KEY_POS, pos.toLong());
 		tag.putBoolean(KEY_AXIS, axis == Direction.Axis.X);
 		tag.putInt(KEY_LENGTH, length);
 		tag.putLongArray(KEY_ROUTE_IDS, routeIds);
@@ -119,7 +119,7 @@ public final class Platform extends DataBase {
 	}
 
 	@Override
-	public void writePacket(PacketByteBuf packet) {
+	public void writePacket(PacketBuffer packet) {
 		super.writePacket(packet);
 		packet.writeBlockPos(pos);
 		packet.writeBoolean(axis == Direction.Axis.X);
@@ -128,7 +128,7 @@ public final class Platform extends DataBase {
 		routeIds.forEach(packet::writeLong);
 		packet.writeInt(trainTypes.size());
 		trainTypes.forEach(trainType -> packet.writeInt(trainType.ordinal()));
-		packet.writeIntArray(frequencies);
+		packet.writeVarIntArray(frequencies);
 		packet.writeBoolean(shuffleRoutes);
 		packet.writeBoolean(shuffleTrains);
 	}
@@ -165,7 +165,7 @@ public final class Platform extends DataBase {
 		generateSchedule();
 	}
 
-	public void updateDimensions(WorldAccess world) {
+	public void updateDimensions(IWorld world) {
 		final Platform tempPlatform = BlockPlatformRail.createNewPlatform(world, getMidPos());
 		if (tempPlatform != null) {
 			pos = tempPlatform.pos;
@@ -179,7 +179,7 @@ public final class Platform extends DataBase {
 		return RailwayData.isBetween(x, pos.getX(), pos2.getX()) && RailwayData.isBetween(z, pos.getZ(), pos2.getZ());
 	}
 
-	public Train createTrainOnPlatform(WorldAccess world, Set<Platform> platforms, Set<Route> routes, int worldTime) {
+	public Train createTrainOnPlatform(IWorld world, Set<Platform> platforms, Set<Route> routes, int worldTime) {
 		final Direction spawnDirection = axis == Direction.Axis.X ? Direction.EAST : Direction.SOUTH;
 		final Optional<Triple<Integer, Long, Train.TrainType>> optionalScheduleEntry = getSchedule().stream().filter(scheduleEntry -> scheduleEntry.getLeft() == worldTime).findFirst();
 		if (optionalScheduleEntry.isPresent()) {
@@ -258,4 +258,5 @@ public final class Platform extends DataBase {
 	public String toString() {
 		return String.format("Platform: %s, +%d%s", pos, length, axis);
 	}
+
 }

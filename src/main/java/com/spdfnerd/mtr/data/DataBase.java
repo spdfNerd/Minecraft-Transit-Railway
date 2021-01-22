@@ -1,7 +1,7 @@
 package com.spdfnerd.mtr.data;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 
 import java.util.Random;
 
@@ -22,27 +22,27 @@ public abstract class DataBase implements Comparable<DataBase> {
 		name = "";
 	}
 
-	public DataBase(CompoundTag tag) {
+	public DataBase(CompoundNBT tag) {
 		id = tag.getLong(KEY_ID);
 		name = tag.getString(KEY_NAME);
 		color = tag.getInt(KEY_COLOR);
 	}
 
-	public DataBase(PacketByteBuf packet) {
+	public DataBase(PacketBuffer packet) {
 		id = packet.readLong();
 		name = packet.readString(PACKET_STRING_READ_LENGTH);
 		color = packet.readInt();
 	}
 
-	public CompoundTag toCompoundTag() {
-		final CompoundTag tag = new CompoundTag();
+	public CompoundNBT toCompoundNBT() {
+		final CompoundNBT tag = new CompoundNBT();
 		tag.putLong(KEY_ID, id);
 		tag.putString(KEY_NAME, name);
 		tag.putInt(KEY_COLOR, color);
 		return tag;
 	}
 
-	public void writePacket(PacketByteBuf packet) {
+	public void writePacket(PacketBuffer packet) {
 		packet.writeLong(id);
 		packet.writeString(name);
 		packet.writeInt(color);
@@ -52,4 +52,5 @@ public abstract class DataBase implements Comparable<DataBase> {
 	public int compareTo(DataBase compare) {
 		return (name.toLowerCase() + color).compareTo((compare.name + compare.color).toLowerCase());
 	}
+
 }

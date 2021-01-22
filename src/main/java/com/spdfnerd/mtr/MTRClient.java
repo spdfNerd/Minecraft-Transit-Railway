@@ -83,10 +83,10 @@ public class MTRClient implements ClientModInitializer {
 		registerStationColor(Blocks.STATION_NAME_TALL_WALL);
 		registerStationColor(Blocks.STATION_POLE);
 
-		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_TRAINS, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.receiveTrainsS2C(packetByteBuf));
-		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_DASHBOARD_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.openDashboardScreenS2C(packetByteBuf));
-		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_PLATFORM_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.openPlatformScreenS2C(packetByteBuf));
-		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_SCHEDULE_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.openScheduleScreenS2C(packetByteBuf));
+		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_TRAINS, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.sReceiveTrains(packetByteBuf));
+		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_DASHBOARD_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.sOpenDashboardScreen(packetByteBuf));
+		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_PLATFORM_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.sOpenPlatformScreen(packetByteBuf));
+		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_OPEN_SCHEDULE_SCREEN, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.sOpenScheduleScreen(packetByteBuf));
 		ClientSidePacketRegistry.INSTANCE.register(IPacket.ID_ALL, (packetContext, packetByteBuf) -> PacketTrainDataGuiClient.receiveAll(packetByteBuf));
 	}
 

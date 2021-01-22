@@ -6,4 +6,5 @@ public final class DataConverter extends DataBase {
 		this.name = name;
 		this.color = color;
 	}
+
 }
