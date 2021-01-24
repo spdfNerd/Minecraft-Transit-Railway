@@ -72,7 +72,7 @@ public class ItemPSDAPGBase extends Item implements IBlock {
 
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		tooltip.add(new StringTextComponent("tooltip.mtr." + item.toString()).setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
+		tooltip.add(new TranslationTextComponent("tooltip.mtr." + item.toString()).setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
 	}
 
 	private BlockState getBlockStateFromItem() {

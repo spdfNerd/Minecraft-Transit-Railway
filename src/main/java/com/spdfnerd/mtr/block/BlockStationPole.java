@@ -26,7 +26,7 @@ public class BlockStationPole extends Block {
 
 	@Override
 	public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		tooltip.add(new StringTextComponent("tooltip.mtr.station_color").setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
+		tooltip.add(new TranslationTextComponent("tooltip.mtr.station_color").setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
 	}
 
 	public static VoxelShape getStationPoleShape() {
