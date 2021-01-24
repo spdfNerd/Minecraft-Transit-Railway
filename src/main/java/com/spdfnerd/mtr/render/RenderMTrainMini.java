@@ -3,20 +3,20 @@ package com.spdfnerd.mtr.render;
 import com.spdfnerd.mtr.entity.EntityMTrainMini;
 import com.spdfnerd.mtr.model.ModelMTrainMini;
 import com.spdfnerd.mtr.model.ModelTrainBase;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.util.ResourceLocation;
 
 public class RenderMTrainMini extends RenderTrainBase<EntityMTrainMini> {
 
-	private static final Identifier texture = new Identifier("mtr:textures/entity/m_train.png");
+	private static final ResourceLocation texture = new ResourceLocation("mtr:textures/entity/m_train.png");
 	private static final ModelMTrainMini model = new ModelMTrainMini();
 
-	public RenderMTrainMini(EntityRenderDispatcher dispatcher) {
-		super(dispatcher);
+	public RenderMTrainMini(EntityRendererManager manager) {
+		super(manager);
 	}
 
 	@Override
-	public Identifier getTexture(EntityMTrainMini entity) {
+	public ResourceLocation getEntityTexture(EntityMTrainMini entity) {
 		return texture;
 	}
 
@@ -24,4 +24,5 @@ public class RenderMTrainMini extends RenderTrainBase<EntityMTrainMini> {
 	protected ModelTrainBase getModel() {
 		return model;
 	}
+
 }

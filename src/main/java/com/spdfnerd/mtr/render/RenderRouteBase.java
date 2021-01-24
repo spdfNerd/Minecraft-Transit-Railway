@@ -1,32 +1,32 @@
 package com.spdfnerd.mtr.render;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.spdfnerd.mtr.block.BlockPlatformRail;
 import com.spdfnerd.mtr.block.IBlock;
 import com.spdfnerd.mtr.block.IPropagateBlock;
 import com.spdfnerd.mtr.gui.IGui;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 
-public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntityRenderer<T> implements IGui {
+public abstract class RenderRouteBase<T extends TileEntity> extends TileEntityRenderer<T> implements IGui {
 
 	private static final float EXTRA_PADDING = 0.0625F;
 
-	public RenderRouteBase(BlockEntityRenderDispatcher dispatcher) {
-		super(dispatcher);
+	public RenderRouteBase(TileEntityRendererDispatcher rendererDispatcher) {
+		super(rendererDispatcher);
 	}
 
 	@Override
-	public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+	public final void render(T entity, float tickDelta, MatrixStack matrices, IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {
 		final World world = entity.getWorld();
 		if (world == null) {
 			return;
@@ -40,15 +40,15 @@ public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntity
 		}
 
 		final BlockState state = world.getBlockState(pos);
-		final Direction facing = IBlock.getStatePropertySafe(state, HorizontalFacingBlock.FACING);
+		final Direction facing = IBlock.getStatePropertySafe(state, HorizontalBlock.HORIZONTAL_FACING);
 		final int arrowDirection = IBlock.getStatePropertySafe(state, IPropagateBlock.PROPAGATE_PROPERTY);
 
-		final RouteRenderer routeRenderer = new RouteRenderer(matrices, vertexConsumers, platformPos, false);
+		final RouteRenderer routeRenderer = new RouteRenderer(matrices, renderTypeBuffer, platformPos, false);
 
 		matrices.push();
 		matrices.translate(0.5, 1, 0.5);
-		matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-facing.asRotation()));
-		matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(180));
+		matrices.rotate(Vector3f.YP.rotationDegrees(-facing.getHorizontalAngle()));
+		matrices.rotate(Vector3f.ZP.rotationDegrees(180));
 		matrices.translate(-0.5, 0, getZ() - SMALL_OFFSET * 2);
 
 		if (isLeft(state)) {
@@ -66,7 +66,7 @@ public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntity
 			}
 		}
 
-		renderAdditional(matrices, vertexConsumers, routeRenderer, state, light);
+		renderAdditional(matrices, renderTypeBuffer, routeRenderer, state, light);
 
 		matrices.pop();
 	}
@@ -85,12 +85,12 @@ public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntity
 
 	protected abstract boolean isRight(BlockState state);
 
-	protected abstract RenderType getRenderType(WorldAccess world, BlockPos pos, BlockState state);
+	protected abstract RenderType getRenderType(IWorld world, BlockPos pos, BlockState state);
 
-	protected abstract void renderAdditional(MatrixStack matrices, VertexConsumerProvider vertexConsumers, RouteRenderer routeRenderer, BlockState state, int light);
+	protected abstract void renderAdditional(MatrixStack matrices, IRenderTypeBuffer renderTypeBuffer, RouteRenderer routeRenderer, BlockState state, int light);
 
-	private BlockPos findPlatformPos(WorldAccess world, BlockPos pos) {
-		final Direction facing = IBlock.getStatePropertySafe(world, pos, HorizontalFacingBlock.FACING);
+	private BlockPos findPlatformPos(IWorld world, BlockPos pos) {
+		final Direction facing = IBlock.getStatePropertySafe(world, pos, HorizontalBlock.HORIZONTAL_FACING);
 		for (int y = 1; y <= 3; y++) {
 			for (int x = 1; x <= 2; x++) {
 				final BlockPos checkPos = pos.down(y).offset(facing, x);
@@ -102,11 +102,11 @@ public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntity
 		return null;
 	}
 
-	private int getGlassLength(WorldAccess world, BlockPos pos, Direction facing) {
+	private int getGlassLength(IWorld world, BlockPos pos, Direction facing) {
 		int glassLength = 1;
 
 		while (true) {
-			final BlockState state = world.getBlockState(pos.offset(facing.rotateYClockwise(), glassLength));
+			final BlockState state = world.getBlockState(pos.offset(facing.rotateY(), glassLength));
 			if (state.getBlock() == world.getBlockState(pos).getBlock() && !isLeft(state)) {
 				glassLength++;
 				if (isRight(state)) {
@@ -120,5 +120,8 @@ public abstract class RenderRouteBase<T extends BlockEntity> extends BlockEntity
 		return glassLength;
 	}
 
-	protected enum RenderType {ARROW, ROUTE, NONE}
+	protected enum RenderType {
+		ARROW, ROUTE, NONE
+	}
+
 }

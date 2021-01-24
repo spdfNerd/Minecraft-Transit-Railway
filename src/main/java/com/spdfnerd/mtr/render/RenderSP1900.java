@@ -3,20 +3,20 @@ package com.spdfnerd.mtr.render;
 import com.spdfnerd.mtr.entity.EntitySP1900;
 import com.spdfnerd.mtr.model.ModelSP1900;
 import com.spdfnerd.mtr.model.ModelTrainBase;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.util.ResourceLocation;
 
 public class RenderSP1900 extends RenderTrainBase<EntitySP1900> {
 
-	private static final Identifier texture = new Identifier("mtr:textures/entity/sp1900.png");
+	private static final ResourceLocation texture = new ResourceLocation("mtr:textures/entity/sp1900.png");
 	private static final ModelSP1900 model = new ModelSP1900();
 
-	public RenderSP1900(EntityRenderDispatcher dispatcher) {
-		super(dispatcher);
+	public RenderSP1900(EntityRendererManager manager) {
+		super(manager);
 	}
 
 	@Override
-	public Identifier getTexture(EntitySP1900 entity) {
+	public ResourceLocation getEntityTexture(EntitySP1900 entity) {
 		return texture;
 	}
 
@@ -24,4 +24,5 @@ public class RenderSP1900 extends RenderTrainBase<EntitySP1900> {
 	protected ModelTrainBase getModel() {
 		return model;
 	}
+	
 }

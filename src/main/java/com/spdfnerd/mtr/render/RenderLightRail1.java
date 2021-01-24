@@ -3,20 +3,20 @@ package com.spdfnerd.mtr.render;
 import com.spdfnerd.mtr.entity.EntityLightRail1;
 import com.spdfnerd.mtr.model.ModelSP1900;
 import com.spdfnerd.mtr.model.ModelTrainBase;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.util.ResourceLocation;
 
 public class RenderLightRail1 extends RenderTrainBase<EntityLightRail1> {
 
-	private static final Identifier texture = new Identifier("textures/block/glowstone.png");
+	private static final ResourceLocation texture = new ResourceLocation("textures/block/glowstone.png");
 	private static final ModelSP1900 model = new ModelSP1900();
 
-	public RenderLightRail1(EntityRenderDispatcher dispatcher) {
+	public RenderLightRail1(EntityRendererManager dispatcher) {
 		super(dispatcher);
 	}
 
 	@Override
-	public Identifier getTexture(EntityLightRail1 entity) {
+	public ResourceLocation getEntityTexture(EntityLightRail1 entity) {
 		return texture;
 	}
 
@@ -24,4 +24,5 @@ public class RenderLightRail1 extends RenderTrainBase<EntityLightRail1> {
 	protected ModelTrainBase getModel() {
 		return model;
 	}
+
 }

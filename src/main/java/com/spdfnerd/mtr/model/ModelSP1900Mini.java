@@ -4,16 +4,17 @@ public class ModelSP1900Mini extends ModelSP1900 {
 
 	@Override
 	protected int[] getWindowPositions() {
-		return new int[]{0};
+		return new int[] { 0 };
 	}
 
 	@Override
 	protected int[] getDoorPositions() {
-		return new int[]{-32, 32};
+		return new int[] { -32, 32 };
 	}
 
 	@Override
 	protected int[] getEndPositions() {
-		return new int[]{-64, 64};
+		return new int[] { -64, 64 };
 	}
+
 }
