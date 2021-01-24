@@ -1,15 +1,15 @@
 package com.spdfnerd.mtr.gui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.widget.button.CheckboxButton;
+import net.minecraft.util.text.ITextComponent;
 
-public class WidgetBetterCheckbox extends CheckboxWidget implements IGui {
+public class WidgetBetterCheckbox extends CheckboxButton implements IGui {
 
 	private final OnClick onClick;
 
-	public WidgetBetterCheckbox(int x, int y, int width, int height, Text text, OnClick onClick) {
+	public WidgetBetterCheckbox(int x, int y, int width, int height, ITextComponent text, OnClick onClick) {
 		super(x, y, width, height, text, false, false);
 		this.onClick = onClick;
 	}
@@ -23,7 +23,7 @@ public class WidgetBetterCheckbox extends CheckboxWidget implements IGui {
 	@Override
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		super.renderButton(matrices, mouseX, mouseY, delta);
-		drawTextWithShadow(matrices, MinecraftClient.getInstance().textRenderer, getMessage(), x + 24, y + (height - 8) / 2, ARGB_WHITE);
+		drawString(matrices, Minecraft.getInstance().fontRenderer, getMessage(), x + 24, y + (height - 8) / 2, ARGB_WHITE);
 	}
 
 	public void setChecked(boolean checked) {
@@ -36,4 +36,5 @@ public class WidgetBetterCheckbox extends CheckboxWidget implements IGui {
 	public interface OnClick {
 		void onClick(boolean checked);
 	}
+
 }

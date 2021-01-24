@@ -1,17 +1,15 @@
 package com.spdfnerd.mtr.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.spdfnerd.mtr.data.*;
-import com.spdfnerd.mtr.packet.PacketTrainDataGuiClient;
 import mtr.data.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Pair;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -29,15 +27,15 @@ public class DashboardScreen extends Screen implements IGui {
 
 	private final WidgetMap widgetMap;
 
-	private final ButtonWidget buttonTabStations;
-	private final ButtonWidget buttonTabRoutes;
-	private final ButtonWidget buttonTabTrains;
-	private final ButtonWidget buttonAddStation;
-	private final ButtonWidget buttonAddRoute;
-	private final ButtonWidget buttonDoneEditingStation;
-	private final ButtonWidget buttonDoneEditingRoute;
-	private final ButtonWidget buttonZoomIn;
-	private final ButtonWidget buttonZoomOut;
+	private final Button buttonTabStations;
+	private final Button buttonTabRoutes;
+	private final Button buttonTabTrains;
+	private final Button buttonAddStation;
+	private final Button buttonAddRoute;
+	private final Button buttonDoneEditingStation;
+	private final Button buttonDoneEditingRoute;
+	private final Button buttonZoomIn;
+	private final Button buttonZoomOut;
 
 	private final TextFieldWidget textFieldName;
 	private final TextFieldWidget textFieldColor;
@@ -49,23 +47,23 @@ public class DashboardScreen extends Screen implements IGui {
 	private static final int MAX_COLOR_LENGTH = 6;
 
 	public DashboardScreen() {
-		super(new LiteralText(""));
+		super(new StringTextComponent(""));
 
 		widgetMap = new WidgetMap(this::onDrawCorners, this::onClickPlatform);
 
-		textRenderer = MinecraftClient.getInstance().textRenderer;
-		textFieldName = new TextFieldWidget(textRenderer, 0, 0, 0, SQUARE_SIZE, new LiteralText(""));
-		textFieldColor = new TextFieldWidget(textRenderer, 0, 0, 0, SQUARE_SIZE, new LiteralText(""));
+		font = minecraft.getInstance().fontRenderer;
+		textFieldName = new TextFieldWidget(font, 0, 0, 0, SQUARE_SIZE, new StringTextComponent(""));
+		textFieldColor = new TextFieldWidget(font, 0, 0, 0, SQUARE_SIZE, new StringTextComponent(""));
 
-		buttonTabStations = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.stations"), button -> onSelectTab(0));
-		buttonTabRoutes = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.routes"), button -> onSelectTab(1));
-		buttonTabTrains = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.trains"), button -> onSelectTab(2));
-		buttonAddStation = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.add_station"), button -> startEditingStation(new Station(), true));
-		buttonAddRoute = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.add_route"), button -> startEditingRoute(new Route(), true));
-		buttonDoneEditingStation = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.done"), button -> onDoneEditingStation());
-		buttonDoneEditingRoute = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.done"), button -> onDoneEditingRoute());
-		buttonZoomIn = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new LiteralText("+"), button -> widgetMap.scale(1));
-		buttonZoomOut = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new LiteralText("-"), button -> widgetMap.scale(-1));
+		buttonTabStations = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.stations"), button -> onSelectTab(0));
+		buttonTabRoutes = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.routes"), button -> onSelectTab(1));
+		buttonTabTrains = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.trains"), button -> onSelectTab(2));
+		buttonAddStation = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.add_station"), button -> startEditingStation(new Station(), true));
+		buttonAddRoute = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.add_route"), button -> startEditingRoute(new Route(), true));
+		buttonDoneEditingStation = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.done"), button -> onDoneEditingStation());
+		buttonDoneEditingRoute = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.done"), button -> onDoneEditingRoute());
+		buttonZoomIn = new Button(0, 0, 0, SQUARE_SIZE, new StringTextComponent("+"), button -> widgetMap.scale(1));
+		buttonZoomOut = new Button(0, 0, 0, SQUARE_SIZE, new StringTextComponent("-"), button -> widgetMap.scale(-1));
 
 		dashboardList = new DashboardList(this::addButton, this::onFind, this::onEdit, null, this::onDelete, this::getList, DashboardScreen::sendUpdate);
 
@@ -101,21 +99,21 @@ public class DashboardScreen extends Screen implements IGui {
 		buttonDoneEditingStation.visible = false;
 
 		textFieldName.setVisible(false);
-		textFieldName.setMaxLength(MAX_STATION_LENGTH);
-		textFieldName.setChangedListener(text -> textFieldName.setSuggestion(text.isEmpty() ? new TranslatableText("gui.mtr.name").getString() : ""));
+		textFieldName.setMaxStringLength(MAX_STATION_LENGTH);
+		textFieldName.setResponder(text -> textFieldName.setSuggestion(text.isEmpty() ? new TranslationTextComponent("gui.mtr.name").getString() : ""));
 		textFieldColor.setVisible(false);
-		textFieldColor.setMaxLength(MAX_COLOR_LENGTH);
-		textFieldColor.setChangedListener(text -> {
+		textFieldColor.setMaxStringLength(MAX_COLOR_LENGTH);
+		textFieldColor.setResponder(text -> {
 			final String newText = text.toUpperCase().replaceAll("[^0-9A-F]", "");
 			if (!newText.equals(text)) {
 				textFieldColor.setText(newText);
 			}
-			textFieldColor.setSuggestion(newText.isEmpty() ? new TranslatableText("gui.mtr.color").getString() : "");
+			textFieldColor.setSuggestion(newText.isEmpty() ? new TranslationTextComponent("gui.mtr.color").getString() : "");
 		});
 
 		dashboardList.init();
 
-		addChild(widgetMap);
+		addListener(widgetMap);
 
 		addButton(buttonTabStations);
 		addButton(buttonTabRoutes);
@@ -127,16 +125,16 @@ public class DashboardScreen extends Screen implements IGui {
 		addButton(buttonZoomIn);
 		addButton(buttonZoomOut);
 
-		addChild(textFieldName);
-		addChild(textFieldColor);
+		addListener(textFieldName);
+		addListener(textFieldColor);
 	}
 
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		renderBackground(matrices);
 		widgetMap.render(matrices, mouseX, mouseY, delta);
-		DrawableHelper.fill(matrices, 0, 0, PANEL_WIDTH, height, ARGB_BACKGROUND);
-		dashboardList.render(matrices, textRenderer);
+		AbstractGui.fill(matrices, 0, 0, PANEL_WIDTH, height, ARGB_BACKGROUND);
+		dashboardList.render(matrices, font);
 		super.render(matrices, mouseX, mouseY, delta);
 		textFieldName.render(matrices, mouseX, mouseY, delta);
 		textFieldColor.render(matrices, mouseX, mouseY, delta);
@@ -201,7 +199,7 @@ public class DashboardScreen extends Screen implements IGui {
 		switch (selectedTab) {
 			case 0:
 				final Station station = (Station) data;
-				widgetMap.find(station.corner1.getLeft(), station.corner1.getRight(), station.corner2.getLeft(), station.corner2.getRight());
+				widgetMap.find(station.corner1.getA(), station.corner1.getB(), station.corner2.getA(), station.corner2.getB());
 				break;
 			case 2:
 				final Train train = (Train) data;
@@ -268,7 +266,7 @@ public class DashboardScreen extends Screen implements IGui {
 		toggleButtons();
 	}
 
-	private void onDrawCorners(Pair<Integer, Integer> corner1, Pair<Integer, Integer> corner2) {
+	private void onDrawCorners(Tuple<Integer, Integer> corner1, Tuple<Integer, Integer> corner2) {
 		editingStation.corner1 = corner1;
 		editingStation.corner2 = corner2;
 		toggleButtons();
@@ -336,4 +334,5 @@ public class DashboardScreen extends Screen implements IGui {
 	private static boolean nonNullCorners(Station station) {
 		return station != null && station.corner1 != null && station.corner2 != null;
 	}
+
 }

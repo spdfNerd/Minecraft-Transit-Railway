@@ -30,4 +30,5 @@ public final class ClientData {
 			this.stationNames = stationNames;
 		}
 	}
+
 }

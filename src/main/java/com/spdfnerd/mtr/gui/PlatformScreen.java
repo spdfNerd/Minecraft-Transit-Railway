@@ -1,16 +1,15 @@
 package com.spdfnerd.mtr.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.spdfnerd.mtr.data.*;
-import com.spdfnerd.mtr.packet.PacketTrainDataGuiClient;
 import mtr.data.*;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -34,9 +33,9 @@ public class PlatformScreen extends Screen implements IGui {
 
 	private final WidgetShorterSlider[] sliders = new WidgetShorterSlider[Platform.HOURS_IN_DAY];
 
-	private final ButtonWidget buttonAddRoute;
-	private final ButtonWidget buttonAddTrains;
-	private final ButtonWidget buttonCancel;
+	private final Button buttonAddRoute;
+	private final Button buttonAddTrains;
+	private final Button buttonCancel;
 	private final WidgetBetterCheckbox buttonShuffleRoutes;
 	private final WidgetBetterCheckbox buttonShuffleTrains;
 
@@ -47,13 +46,13 @@ public class PlatformScreen extends Screen implements IGui {
 	private final DashboardList trainList;
 
 	public PlatformScreen(BlockPos platformPos) {
-		super(new LiteralText(""));
+		super(new StringTextComponent(""));
 		this.platformPos = platformPos;
 
-		client = MinecraftClient.getInstance();
-		sliderX = client.textRenderer.getWidth(getTimeString(0)) + TEXT_PADDING * 2;
-		sliderWidthWithText = SLIDER_WIDTH + TEXT_PADDING + client.textRenderer.getWidth(getSliderString(0));
-		rightPanelsX = sliderX + SLIDER_WIDTH + TEXT_PADDING * 2 + client.textRenderer.getWidth(getSliderString(1));
+		minecraft = Minecraft.getInstance();
+		sliderX = minecraft.fontRenderer.getStringWidth(getTimeString(0)) + TEXT_PADDING * 2;
+		sliderWidthWithText = SLIDER_WIDTH + TEXT_PADDING + minecraft.fontRenderer.getStringWidth(getSliderString(0));
+		rightPanelsX = sliderX + SLIDER_WIDTH + TEXT_PADDING * 2 + minecraft.fontRenderer.getStringWidth(getSliderString(1));
 
 		for (int i = 0; i < Platform.HOURS_IN_DAY; i++) {
 			final int index = i;
@@ -63,13 +62,13 @@ public class PlatformScreen extends Screen implements IGui {
 			}, PlatformScreen::getSliderString);
 		}
 
-		buttonAddRoute = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.add_route"), button -> onAddingRoute());
-		buttonAddTrains = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.add_train"), button -> onAddingTrain());
-		buttonCancel = new ButtonWidget(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.cancel"), button -> setAdding(false, false));
-		buttonShuffleRoutes = new WidgetBetterCheckbox(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.shuffle_routes"), this::onShuffleRoutesCheckedChanged);
-		buttonShuffleTrains = new WidgetBetterCheckbox(0, 0, 0, SQUARE_SIZE, new TranslatableText("gui.mtr.shuffle_trains"), this::onShuffleTrainsCheckedChanged);
+		buttonAddRoute = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.add_route"), button -> onAddingRoute());
+		buttonAddTrains = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.add_train"), button -> onAddingTrain());
+		buttonCancel = new Button(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.cancel"), button -> setAdding(false, false));
+		buttonShuffleRoutes = new WidgetBetterCheckbox(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.shuffle_routes"), this::onShuffleRoutesCheckedChanged);
+		buttonShuffleTrains = new WidgetBetterCheckbox(0, 0, 0, SQUARE_SIZE, new TranslationTextComponent("gui.mtr.shuffle_trains"), this::onShuffleTrainsCheckedChanged);
 
-		textFieldName = new TextFieldWidget(client.textRenderer, 0, 0, 0, SQUARE_SIZE, new LiteralText(""));
+		textFieldName = new TextFieldWidget(minecraft.fontRenderer, 0, 0, 0, SQUARE_SIZE, new StringTextComponent(""));
 
 		addNewList = new DashboardList(this::addButton, null, null, this::onAdded, null, null, this::sendUpdate);
 		routeList = new DashboardList(this::addButton, null, null, null, this::onDeleteRoute, this::getRouteList, this::sendUpdate);
@@ -78,12 +77,12 @@ public class PlatformScreen extends Screen implements IGui {
 
 	@Override
 	protected void init() {
-		setPositionAndWidth(buttonAddRoute, rightPanelsX, height - SQUARE_SIZE, getRightPanelWidth());
-		setPositionAndWidth(buttonAddTrains, rightPanelsX + getRightPanelWidth(), height - SQUARE_SIZE, getRightPanelWidth());
-		setPositionAndWidth(buttonCancel, (width - PANEL_WIDTH) / 2, height - SQUARE_SIZE * 2, PANEL_WIDTH);
-		setPositionAndWidth(buttonShuffleRoutes, rightPanelsX + TEXT_PADDING, SQUARE_SIZE * 2 + TEXT_FIELD_PADDING, getRightPanelWidth());
-		setPositionAndWidth(buttonShuffleTrains, rightPanelsX + TEXT_PADDING, SQUARE_SIZE * 3 + TEXT_FIELD_PADDING, getRightPanelWidth());
-		setPositionAndWidth(textFieldName, rightPanelsX + getRightPanelWidth(), SQUARE_SIZE, getRightPanelWidth() - TEXT_PADDING - TEXT_FIELD_PADDING);
+		IGui.setPositionAndWidth(buttonAddRoute, rightPanelsX, height - SQUARE_SIZE, getRightPanelWidth());
+		IGui.setPositionAndWidth(buttonAddTrains, rightPanelsX + getRightPanelWidth(), height - SQUARE_SIZE, getRightPanelWidth());
+		IGui.setPositionAndWidth(buttonCancel, (width - PANEL_WIDTH) / 2, height - SQUARE_SIZE * 2, PANEL_WIDTH);
+		IGui.setPositionAndWidth(buttonShuffleRoutes, rightPanelsX + TEXT_PADDING, SQUARE_SIZE * 2 + TEXT_FIELD_PADDING, getRightPanelWidth());
+		IGui.setPositionAndWidth(buttonShuffleTrains, rightPanelsX + TEXT_PADDING, SQUARE_SIZE * 3 + TEXT_FIELD_PADDING, getRightPanelWidth());
+		IGui.setPositionAndWidth(textFieldName, rightPanelsX + getRightPanelWidth(), SQUARE_SIZE, getRightPanelWidth() - TEXT_PADDING - TEXT_FIELD_PADDING);
 
 		addNewList.y = SQUARE_SIZE * 2;
 		addNewList.height = height - SQUARE_SIZE * 4;
@@ -98,10 +97,10 @@ public class PlatformScreen extends Screen implements IGui {
 		trainList.width = getRightPanelWidth();
 
 		textFieldName.setText(getPlatform().name);
-		textFieldName.setMaxLength(MAX_PLATFORM_NAME_LENGTH);
-		textFieldName.setChangedListener(text -> {
+		textFieldName.setMaxStringLength(MAX_PLATFORM_NAME_LENGTH);
+		textFieldName.setResponder(text -> {
 			textFieldName.setSuggestion(text.isEmpty() ? "1" : "");
-			getPlatform().name = textOrUntitled(textFieldName.getText());
+			getPlatform().name = IGui.textOrUntitled(textFieldName.getText());
 			sendUpdate();
 		});
 
@@ -119,7 +118,7 @@ public class PlatformScreen extends Screen implements IGui {
 		addButton(buttonShuffleRoutes);
 		addButton(buttonShuffleTrains);
 
-		addChild(textFieldName);
+		addListener(textFieldName);
 
 		setAdding(false, false);
 	}
@@ -144,28 +143,29 @@ public class PlatformScreen extends Screen implements IGui {
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (addingRoute || addingTrain) {
 			renderBackground(matrices);
-			addNewList.render(matrices, textRenderer);
+			addNewList.render(matrices, font);
 			super.render(matrices, mouseX, mouseY, delta);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr." + (addingRoute ? "add_route" : "add_train")), width / 2, SQUARE_SIZE + TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr." + (addingRoute ? "add_route" : "add_train")), width / 2, SQUARE_SIZE + TEXT_PADDING, ARGB_LIGHT_GRAY);
 		} else {
-			drawVerticalLine(matrices, rightPanelsX - 1, -1, height, ARGB_WHITE_TRANSLUCENT);
-			drawHorizontalLine(matrices, rightPanelsX, width, SETTINGS_HEIGHT, ARGB_WHITE_TRANSLUCENT);
+			vLine(matrices, rightPanelsX - 1, -1, height, ARGB_WHITE_TRANSLUCENT);
+			hLine(matrices, rightPanelsX, width, SETTINGS_HEIGHT, ARGB_WHITE_TRANSLUCENT);
 			renderBackground(matrices);
 			textFieldName.render(matrices, mouseX, mouseY, delta);
-			routeList.render(matrices, textRenderer);
-			trainList.render(matrices, textRenderer);
+			routeList.render(matrices, font);
+			trainList.render(matrices, font);
 			super.render(matrices, mouseX, mouseY, delta);
 
-			drawTextWithShadow(matrices, textRenderer, new TranslatableText("gui.mtr.platform_number"), rightPanelsX + TEXT_PADDING, SQUARE_SIZE + TEXT_PADDING, ARGB_WHITE);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr.game_time"), sliderX / 2, TEXT_PADDING, ARGB_LIGHT_GRAY);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr.trains_per_hour"), sliderX + sliderWidthWithText / 2, TEXT_PADDING, ARGB_LIGHT_GRAY);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr.settings"), rightPanelsX + getRightPanelWidth(), TEXT_PADDING, ARGB_LIGHT_GRAY);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr.routes"), rightPanelsX + getRightPanelWidth() / 2, SETTINGS_HEIGHT + TEXT_PADDING, ARGB_LIGHT_GRAY);
-			drawCenteredText(matrices, textRenderer, new TranslatableText("gui.mtr.trains"), rightPanelsX + 3 * getRightPanelWidth() / 2, SETTINGS_HEIGHT + TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawString(matrices, font, new TranslationTextComponent("gui.mtr.platform_number"), rightPanelsX + TEXT_PADDING, SQUARE_SIZE + TEXT_PADDING,
+					ARGB_WHITE);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr.game_time"), sliderX / 2, TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr.trains_per_hour"), sliderX + sliderWidthWithText / 2, TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr.settings"), rightPanelsX + getRightPanelWidth(), TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr.routes"), rightPanelsX + getRightPanelWidth() / 2, SETTINGS_HEIGHT + TEXT_PADDING, ARGB_LIGHT_GRAY);
+			drawCenteredString(matrices, font, new TranslationTextComponent("gui.mtr.trains"), rightPanelsX + 3 * getRightPanelWidth() / 2, SETTINGS_HEIGHT + TEXT_PADDING, ARGB_LIGHT_GRAY);
 
 			final int lineHeight = Math.min(SQUARE_SIZE, (height - SQUARE_SIZE) / Platform.HOURS_IN_DAY);
 			for (int i = 0; i < Platform.HOURS_IN_DAY; i++) {
-				drawStringWithShadow(matrices, textRenderer, getTimeString(i), TEXT_PADDING, SQUARE_SIZE + lineHeight * i + (int) ((lineHeight - TEXT_HEIGHT) / 2F), ARGB_WHITE);
+				drawString(matrices, font, getTimeString(i), TEXT_PADDING, SQUARE_SIZE + lineHeight * i + (int) ((lineHeight - TEXT_HEIGHT) / 2F), ARGB_WHITE);
 				sliders[i].y = SQUARE_SIZE + lineHeight * i;
 				sliders[i].setHeight(lineHeight);
 			}
@@ -278,9 +278,9 @@ public class PlatformScreen extends Screen implements IGui {
 		if (value == 0) {
 			headwayText = "";
 		} else {
-			headwayText = " (" + (Math.round(20F * SECONDS_PER_MC_HOUR / value) / 10F) + new TranslatableText("gui.mtr.s").getString() + ")";
+			headwayText = " (" + (Math.round(20F * SECONDS_PER_MC_HOUR / value) / 10F) + new TranslationTextComponent("gui.mtr.s").getString() + ")";
 		}
-		return value / 2F + new TranslatableText("gui.mtr.tph").getString() + headwayText;
+		return value / 2F + new TranslationTextComponent("gui.mtr.tph").getString() + headwayText;
 	}
 
 	private static String getTimeString(int hour) {

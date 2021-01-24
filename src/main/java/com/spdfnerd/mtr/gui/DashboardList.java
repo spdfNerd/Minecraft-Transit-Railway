@@ -1,16 +1,16 @@
 package com.spdfnerd.mtr.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.spdfnerd.mtr.data.DataBase;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.ImageButton;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,12 +24,12 @@ public class DashboardList implements IGui {
 	public int width;
 	public int height;
 
-	private final TexturedButtonWidget buttonFind;
-	private final TexturedButtonWidget buttonEdit;
-	private final TexturedButtonWidget buttonUp;
-	private final TexturedButtonWidget buttonDown;
-	private final TexturedButtonWidget buttonAdd;
-	private final TexturedButtonWidget buttonDelete;
+	private final ImageButton buttonFind;
+	private final ImageButton buttonEdit;
+	private final ImageButton buttonUp;
+	private final ImageButton buttonDown;
+	private final ImageButton buttonAdd;
+	private final ImageButton buttonDelete;
 
 	private final RegisterButton registerButton;
 
@@ -44,12 +44,12 @@ public class DashboardList implements IGui {
 
 	public <T> DashboardList(RegisterButton registerButton, OnClick onFind, OnClick onEdit, OnClick onAdd, OnClick onDelete, GetList<T> getList, Runnable onUpDownCallback) {
 		this.registerButton = registerButton;
-		buttonFind = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_find.png"), 20, 40, button -> onClick(onFind));
-		buttonEdit = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_edit.png"), 20, 40, button -> onClick(onEdit));
-		buttonUp = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_up.png"), 20, 40, button -> onUp(getList, onUpDownCallback));
-		buttonDown = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_down.png"), 20, 40, button -> onDown(getList, onUpDownCallback));
-		buttonAdd = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_add.png"), 20, 40, button -> onClick(onAdd));
-		buttonDelete = new TexturedButtonWidget(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new Identifier("mtr:textures/gui/icon_delete.png"), 20, 40, button -> onClick(onDelete));
+		buttonFind = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_find.png"), 20, 40, button -> onClick(onFind));
+		buttonEdit = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_edit.png"), 20, 40, button -> onClick(onEdit));
+		buttonUp = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_up.png"), 20, 40, button -> onUp(getList, onUpDownCallback));
+		buttonDown = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_down.png"), 20, 40, button -> onDown(getList, onUpDownCallback));
+		buttonAdd = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_add.png"), 20, 40, button -> onClick(onAdd));
+		buttonDelete = new ImageButton(0, 0, 0, SQUARE_SIZE, 0, 0, 20, new ResourceLocation("mtr:textures/gui/icon_delete.png"), 20, 40, button -> onClick(onDelete));
 	}
 
 	public void init() {
@@ -88,7 +88,7 @@ public class DashboardList implements IGui {
 		}
 	}
 
-	public void render(MatrixStack matrices, TextRenderer textRenderer) {
+	public void render(MatrixStack matrices, FontRenderer fontRenderer) {
 		for (int i = 0; i < itemsToShow(); i++) {
 			if (i + scrollOffset < dataSorted.size()) {
 				final int drawY = SQUARE_SIZE * i + TEXT_PADDING;
@@ -98,14 +98,15 @@ public class DashboardList implements IGui {
 				BufferBuilder buffer = tessellator.getBuffer();
 				RenderSystem.enableBlend();
 				RenderSystem.disableTexture();
-				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-				buffer.begin(7, VertexFormats.POSITION_COLOR);
+				RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+						GlStateManager.DestFactor.ZERO);
+				buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
 				IGui.drawRectangle(buffer, x + TEXT_PADDING, y + drawY, x + TEXT_PADDING + TEXT_HEIGHT, y + drawY + TEXT_HEIGHT, ARGB_BLACK + data.color);
 				tessellator.draw();
 				RenderSystem.enableTexture();
 				RenderSystem.disableBlend();
 
-				textRenderer.draw(matrices, IGui.formatStationName(data.name), x + TEXT_PADDING * 2 + TEXT_HEIGHT, y + drawY, ARGB_WHITE);
+				fontRenderer.drawString(matrices, IGui.formatStationName(data.name), x + TEXT_PADDING * 2 + TEXT_HEIGHT, y + drawY, ARGB_WHITE);
 			}
 		}
 	}
@@ -183,7 +184,7 @@ public class DashboardList implements IGui {
 
 	@FunctionalInterface
 	public interface RegisterButton {
-		void registerButton(AbstractButtonWidget button);
+		void registerButton(Widget button);
 	}
 
 	@FunctionalInterface
