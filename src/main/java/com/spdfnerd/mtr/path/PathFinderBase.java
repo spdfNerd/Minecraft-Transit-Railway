@@ -143,4 +143,5 @@ public abstract class PathFinderBase {
 			return Double.compare(weight, o.weight);
 		}
 	}
+
 }
