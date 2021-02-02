@@ -6,7 +6,7 @@ import com.spdfnerd.mtr.setup.Registration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod("mtr")
+@Mod(MTR.MOD_ID)
 public class MTR {
 
 	public static final String MOD_ID = "mtr";

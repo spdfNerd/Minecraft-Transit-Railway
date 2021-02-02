@@ -2,7 +2,6 @@ package com.spdfnerd.mtr.data;
 
 import com.spdfnerd.mtr.block.BlockPlatformRail;
 import com.spdfnerd.mtr.entity.EntityTrainBase;
-import com.spdfnerd.mtr.packet.PacketTrainDataGuiServer;
 import com.spdfnerd.mtr.path.PathFinderBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -225,7 +224,7 @@ public class RailwayData extends WorldSavedData {
 		});
 
 		trainsToRemove.forEach(this::removeTrain);
-		PacketTrainDataGuiServer.sendTrainsS2C(world, trains);
+//		PacketTrainDataGuiServer.sendTrainsS2C(world, trains);
 
 		if (world.getWorldInfo().getGameRulesInstance().get(GameRules.DO_DAYLIGHT_CYCLE).get()) {
 			platforms.forEach(platform -> {

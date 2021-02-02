@@ -3,7 +3,6 @@ package com.spdfnerd.mtr.block;
 import com.spdfnerd.mtr.data.Platform;
 import com.spdfnerd.mtr.data.RailwayData;
 import com.spdfnerd.mtr.entity.EntityTrainBase;
-import com.spdfnerd.mtr.packet.PacketTrainDataGuiServer;
 import com.spdfnerd.mtr.setup.Registration;
 import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.Block;
@@ -74,14 +73,14 @@ public class BlockPlatformRail extends AbstractRailBlock {
 			final RailwayData railwayData = RailwayData.getInstance(world);
 			if (railwayData != null) {
 				BlockPos platformPos = getPlatformPos1(world, pos);
-				PacketTrainDataGuiServer.openPlatformScreenS2C(player, railwayData.getStations(), railwayData.getPlatforms(world), railwayData.getRoutes(), platformPos);
+//				PacketTrainDataGuiServer.openPlatformScreenS2C(player, railwayData.getStations(), railwayData.getPlatforms(world), railwayData.getRoutes(), platformPos);
 			}
 		}, () -> {
 			if (!(player.getHeldItemMainhand().getItem() == Registration.PLATFORM_RAIL.get().asItem())) {
 				final RailwayData railwayData = RailwayData.getInstance(world);
 				if (railwayData != null) {
 					BlockPos platformPos = getPlatformPos1(world, pos);
-					PacketTrainDataGuiServer.openScheduleScreenS2C(player, railwayData.getStations(), railwayData.getPlatforms(world), railwayData.getRoutes(), platformPos);
+//					PacketTrainDataGuiServer.openScheduleScreenS2C(player, railwayData.getStations(), railwayData.getPlatforms(world), railwayData.getRoutes(), platformPos);
 				}
 			}
 		});

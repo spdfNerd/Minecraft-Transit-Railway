@@ -2,7 +2,6 @@ package com.spdfnerd.mtr.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.spdfnerd.mtr.data.*;
-import mtr.data.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -270,7 +269,7 @@ public class PlatformScreen extends Screen implements IGui {
 	}
 
 	private void sendUpdate() {
-		PacketTrainDataGuiClient.cSendPlatform(getPlatform());
+//		PacketTrainDataGuiClient.cSendPlatform(getPlatform());
 	}
 
 	private static String getSliderString(int value) {

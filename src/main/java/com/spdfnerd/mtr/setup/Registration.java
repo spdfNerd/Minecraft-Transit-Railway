@@ -81,8 +81,8 @@ public class Registration {
 			MaterialColor.QUARTZ).setRequiresTool().hardnessAndResistance(2f).setLightLevel(value -> 5)));
 	public static final RegistryObject<BlockItem> CLOCK_ITEM = ITEMS.register("clock", () -> new BlockItem(CLOCK.get(),
 			new Item.Properties().group(ItemGroup.DECORATIONS)));
-	public static final RegistryObject<Block> ESCALATOR_SIDE = BLOCKS.register("esalator_side", BlockEscalatorSide::new);
-	public static final RegistryObject<Block> ESCALATOR_STEP = BLOCKS.register("esalator_side", BlockEscalatorStep::new);
+	public static final RegistryObject<Block> ESCALATOR_SIDE = BLOCKS.register("escalator_side", BlockEscalatorSide::new);
+	public static final RegistryObject<Block> ESCALATOR_STEP = BLOCKS.register("escalator_step", BlockEscalatorStep::new);
 	public static final RegistryObject<Item> ESCALATOR_ITEM = ITEMS.register("escalator",
 			() -> new ItemEscalator(new Item.Properties().group(ItemGroup.TRANSPORTATION)));
 	public static final RegistryObject<Block> LOGO = BLOCKS.register("logo",

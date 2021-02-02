@@ -1,7 +1,6 @@
 package com.spdfnerd.mtr.item;
 
 import com.spdfnerd.mtr.data.RailwayData;
-import com.spdfnerd.mtr.packet.PacketTrainDataGuiServer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,7 +19,7 @@ public class ItemDashboard extends Item {
 		if (!world.isRemote) {
 			RailwayData railwayData = RailwayData.getInstance(world);
 			if (railwayData != null) {
-				PacketTrainDataGuiServer.openDashboardScreenS2C(player, railwayData.getPlatforms(world), railwayData.getRoutes());
+//				PacketTrainDataGuiServer.openDashboardScreenS2C(player, railwayData.getPlatforms(world), railwayData.getRoutes());
 			}
 		}
 		return super.onItemRightClick(world, player, hand);
