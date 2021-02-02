@@ -13,10 +13,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.client.render.model.UnbakedModel;
+import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.util.RenderMaterial;
+import net.minecraft.screen.AtlasTexture;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Direction;
 
 import java.util.Arrays;
@@ -26,26 +30,26 @@ import java.util.function.Function;
 
 public class PSDDoorModel extends CustomBlockModelBase implements IBlock {
 
-	private static final SpriteIdentifier[] SPRITE_IDS = new SpriteIdentifier[]{
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/black")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_side_light")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_bottom")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_bottom_back")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_end_bottom")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_end_bottom_back")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_top")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_top_back")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_end_top")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_door_end_top_back"))
+	private static final RenderMaterial[] SPRITE_IDS = new RenderMaterial[]{
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/black")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_side_light")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_bottom")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_bottom_back")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_end_bottom")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_end_bottom_back")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_top")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_top_back")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_end_top")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_door_end_top_back"))
 	};
 	private static final int SPRITE_COUNT = SPRITE_IDS.length;
 
-	private final Sprite[] SPRITES = new Sprite[SPRITE_COUNT];
+	private final TextureAtlasSprite[] SPRITES = new TextureAtlasSprite[SPRITE_COUNT];
 
 	@Override
-	protected Mesh bake(BlockState state, Function<SpriteIdentifier, Sprite> textureGetter) {
+	public IBakedModel bake(BlockState state, Function<RenderMaterial, TextureAtlasSprite> spriteGetter) {
 		for (int i = 0; i < SPRITE_COUNT; i++) {
-			SPRITES[i] = textureGetter.apply(SPRITE_IDS[i]);
+			SPRITES[i] = spriteGetter.apply(SPRITE_IDS[i]);
 		}
 
 		Renderer renderer = RendererAccess.INSTANCE.getRenderer();
@@ -73,12 +77,12 @@ public class PSDDoorModel extends CustomBlockModelBase implements IBlock {
 	}
 
 	@Override
-	public Collection<SpriteIdentifier> getTextureDependencies(Function<Identifier, UnbakedModel> unbakedModelGetter, Set<Pair<String, String>> unresolvedTextureReferences) {
+	public Collection<RenderMaterial> getTextures(Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 		return Arrays.asList(SPRITE_IDS);
 	}
 
 	@Override
-	public Sprite getSprite() {
+	public TextureAtlasSprite getParticleTexture() {
 		return SPRITES[2];
 	}
 
@@ -113,4 +117,5 @@ public class PSDDoorModel extends CustomBlockModelBase implements IBlock {
 		emitter.spriteColor(0, -1, -1, -1, -1);
 		emitter.emit();
 	}
+
 }

@@ -12,13 +12,18 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.UnbakedModel;
+import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.util.RenderMaterial;
+import net.minecraft.screen.AtlasTexture;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.client.model.data.IModelData;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -26,25 +31,25 @@ import java.util.function.Function;
 
 public class PSDTopModel extends CustomBlockModelBase implements IBlock {
 
-	public static final float END_FRONT_OFFSET = 1 / (MathHelper.SQUARE_ROOT_OF_TWO * 16);
+	public static final float END_FRONT_OFFSET = 1 / (MathHelper.SQRT_2 * 16);
 
-	private static final SpriteIdentifier[] SPRITE_IDS = new SpriteIdentifier[]{
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_top")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/psd_top_edge")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/light_off")),
-			new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, new Identifier("mtr:block/light_on"))
+	private static final RenderMaterial[] SPRITE_IDS = new RenderMaterial[]{
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_top")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/psd_top_edge")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/light_off")),
+			new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("mtr:block/light_on"))
 	};
 	private static final int SPRITE_COUNT = SPRITE_IDS.length;
 	private static final float BOTTOM_DIAGONAL_OFFSET = ((float) Math.sqrt(3) - 1) / 32;
-	private static final float ROOT_TWO_SCALED = MathHelper.SQUARE_ROOT_OF_TWO / 16;
-	private static final float BOTTOM_END_DIAGONAL_OFFSET = END_FRONT_OFFSET - BOTTOM_DIAGONAL_OFFSET / MathHelper.SQUARE_ROOT_OF_TWO;
+	private static final float ROOT_TWO_SCALED = MathHelper.SQRT_2 / 16;
+	private static final float BOTTOM_END_DIAGONAL_OFFSET = END_FRONT_OFFSET - BOTTOM_DIAGONAL_OFFSET / MathHelper.SQRT_2;
 
-	private final Sprite[] SPRITES = new Sprite[SPRITE_COUNT];
+	private final TextureAtlasSprite[] SPRITES = new TextureAtlasSprite[SPRITE_COUNT];
 
 	@Override
-	protected Mesh bake(BlockState state, Function<SpriteIdentifier, Sprite> textureGetter) {
+	protected IBakedModel bake(BlockState state, Function<RenderMaterial, TextureAtlasSprite> spriteGetter) {
 		for (int i = 0; i < SPRITE_COUNT; i++) {
-			SPRITES[i] = textureGetter.apply(SPRITE_IDS[i]);
+			SPRITES[i] = spriteGetter.apply(SPRITE_IDS[i]);
 		}
 
 		Renderer renderer = RendererAccess.INSTANCE.getRenderer();
@@ -269,12 +274,12 @@ public class PSDTopModel extends CustomBlockModelBase implements IBlock {
 	}
 
 	@Override
-	public Collection<SpriteIdentifier> getTextureDependencies(Function<Identifier, UnbakedModel> unbakedModelGetter, Set<Pair<String, String>> unresolvedTextureReferences) {
+	public Collection<RenderMaterial> getTextures(Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 		return Arrays.asList(SPRITE_IDS);
 	}
 
 	@Override
-	public Sprite getSprite() {
+	public TextureAtlasSprite getParticleTexture() {
 		return SPRITES[0];
 	}
 
@@ -282,4 +287,5 @@ public class PSDTopModel extends CustomBlockModelBase implements IBlock {
 	protected Block getBlock() {
 		return new BlockPSDTop();
 	}
+
 }

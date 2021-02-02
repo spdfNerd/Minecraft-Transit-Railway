@@ -1,55 +1,55 @@
 package com.spdfnerd.mtr.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.*;
-import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.state.Property;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.client.model.data.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-public abstract class CustomBlockModelBase implements UnbakedModel, BakedModel, FabricBakedModel {
+public abstract class CustomBlockModelBase implements IDynamicBakedModel, IUnbakedModel {
 
-	private final Map<ImmutableMap<Property<?>, Comparable<?>>, Mesh> meshMap = new HashMap<>();
+	private final Map<ImmutableMap<Property<?>, Comparable<?>>, IBakedModel> meshMap = new HashMap<>();
 
 	@Override
-	public Collection<Identifier> getModelDependencies() {
+	public Collection<ResourceLocation> getDependencies() {
 		return Collections.emptyList();
 	}
 
+	@Nullable
 	@Override
-	public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
-		getBlock().getStateManager().getStates().forEach(blockState -> meshMap.put(blockState.getEntries(), bake(blockState, textureGetter)));
+	public IBakedModel bakeModel(ModelBakery modelBakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform transform, ResourceLocation location) {
+		getBlock().getStateContainer().getValidStates().forEach(state -> meshMap.put(state.getValues(), bake(state, spriteGetter)));
 		return this;
 	}
 
+	@Nonnull
 	@Override
-	public List<BakedQuad> getQuads(BlockState state, Direction face, Random random) {
+	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
 		return null;
 	}
 
 	@Override
-	public boolean useAmbientOcclusion() {
+	public boolean isAmbientOcclusion() {
 		return true;
 	}
 
 	@Override
-	public boolean hasDepth() {
+	public boolean isGui3d() {
 		return false;
 	}
 
@@ -59,66 +59,58 @@ public abstract class CustomBlockModelBase implements UnbakedModel, BakedModel, 
 	}
 
 	@Override
-	public boolean isBuiltin() {
+	public boolean isBuiltInRenderer() {
 		return false;
 	}
 
 	@Override
-	public ModelTransformation getTransformation() {
+	public ItemCameraTransforms getItemCameraTransforms() {
 		return null;
 	}
 
 	@Override
-	public ModelOverrideList getOverrides() {
+	public ItemOverrideList getOverrides() {
 		return null;
 	}
 
-	@Override
-	public boolean isVanillaAdapter() {
-		return false;
-	}
-
-	@Override
-	public void emitBlockQuads(BlockRenderView blockRenderView, BlockState blockState, BlockPos blockPos, Supplier<Random> supplier, RenderContext renderContext) {
-		renderContext.meshConsumer().accept(meshMap.get(blockState.getEntries()));
-	}
-
-	@Override
-	public void emitItemQuads(ItemStack itemStack, Supplier<Random> supplier, RenderContext renderContext) {
-	}
-
-	protected abstract Mesh bake(BlockState state, Function<SpriteIdentifier, Sprite> textureGetter);
+	protected abstract IBakedModel bake(BlockState state, Function<RenderMaterial, TextureAtlasSprite> spriteGetter);
 
 	protected abstract Block getBlock();
 
-	protected static void customShape(QuadEmitter emitter, Direction facing, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
-		switch (facing) {
-			case NORTH:
-				emitter.pos(2, x1, y1, z1);
-				emitter.pos(3, x2, y2, z2);
-				emitter.pos(0, x3, y3, z3);
-				emitter.pos(1, x4, y4, z4);
-				break;
-			case EAST:
-				emitter.pos(2, 1 - z1, y1, x1);
-				emitter.pos(3, 1 - z2, y2, x2);
-				emitter.pos(0, 1 - z3, y3, x3);
-				emitter.pos(1, 1 - z4, y4, x4);
-				break;
-			case SOUTH:
-				emitter.pos(2, 1 - x1, y1, 1 - z1);
-				emitter.pos(3, 1 - x2, y2, 1 - z2);
-				emitter.pos(0, 1 - x3, y3, 1 - z3);
-				emitter.pos(1, 1 - x4, y4, 1 - z4);
-				break;
-			case WEST:
-				emitter.pos(2, z1, y1, 1 - x1);
-				emitter.pos(3, z2, y2, 1 - x2);
-				emitter.pos(0, z3, y3, 1 - x3);
-				emitter.pos(1, z4, y4, 1 - x4);
-				break;
+	protected void putVertex(BakedQuadBuilder builder, Vector3d normal, double x, double y, double z, float u, float v, TextureAtlasSprite sprite, float r,
+						   float g, float b) {
+		ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements().asList();
+		for (int i = 0; i < elements.size(); i++) {
+			VertexFormatElement element = elements.get(i);
+			switch (element.getUsage()) {
+				case POSITION:
+					builder.put(i, (float) x, (float) y, (float) z, 1f);
+					break;
+				case COLOR:
+					builder.put(i, r, g, b, 1f);
+					break;
+				case UV:
+					switch (element.getIndex()) {
+						case 0:
+							float iu = sprite.getInterpolatedU(u);
+							float iv = sprite.getInterpolatedV(v);
+							builder.put(i, iu, iv);
+							break;
+						case 2:
+							builder.put(i, (short) 0, (short) 0);
+							break;
+						default:
+							builder.put(i);
+							break;
+					}
+					break;
+				case NORMAL:
+					builder.put(i, (float) normal.x, (float) normal.y, (float) normal.z);
+					break;
+				default:
+					builder.put(i);
+					break;
+			}
 		}
-		emitter.spriteColor(0, -1, -1, -1, -1);
-		emitter.emit();
 	}
 }
