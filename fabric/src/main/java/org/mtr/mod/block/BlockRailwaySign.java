@@ -96,7 +96,12 @@ public class BlockRailwaySign extends BlockExtension implements IBlock, Directio
 	@Override
 	public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-		if (state.isOf(org.mtr.mod.Blocks.RAILWAY_SIGN_MIDDLE.get())) {
+		if (getMiddleLength() == -1) {
+			final VoxelShape main = IBlock.getVoxelShapeByDirection(2, 0, 7, 14, 12, 9, facing);
+			final VoxelShape pole1 = IBlock.getVoxelShapeByDirection(2, 0, 7, 3.25, 16, 9, facing);
+			final VoxelShape pole2 = IBlock.getVoxelShapeByDirection(12.75, 0, 7, 14, 16, 9, facing);
+			return VoxelShapes.union(pole1, VoxelShapes.union(main, pole2));
+		} else if (state.isOf(org.mtr.mod.Blocks.RAILWAY_SIGN_MIDDLE.get())) {
 			return IBlock.getVoxelShapeByDirection(0, 0, 7, 16, 12, 9, facing);
 		} else {
 			final int xStart = getXStart();

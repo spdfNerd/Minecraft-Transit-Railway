@@ -1,18 +1,18 @@
 {
 	"variants": {
 		"facing=north": {
-			"model": "mtr:block/railway_sign_end_zero"
+			"model": "mtr:block/railway_sign_one_wide"
 		},
 		"facing=east": {
-			"model": "mtr:block/railway_sign_end_zero",
+			"model": "mtr:block/railway_sign_one_wide",
 			"y": 90
 		},
 		"facing=south": {
-			"model": "mtr:block/railway_sign_end_zero",
+			"model": "mtr:block/railway_sign_one_wide",
 			"y": 180
 		},
 		"facing=west": {
-			"model": "mtr:block/railway_sign_end_zero",
+			"model": "mtr:block/railway_sign_one_wide",
 			"y": 270
 		}
 	}
