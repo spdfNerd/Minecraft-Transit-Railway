@@ -31,6 +31,8 @@ public final class BlockEntityTypes {
 		PSD_DOOR_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "psd_door_1"), (pos, state) -> new BlockPSDDoor.BlockEntity(0, pos, state), Blocks.PSD_DOOR_1::get);
 		PSD_DOOR_2 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "psd_door_2"), (pos, state) -> new BlockPSDDoor.BlockEntity(1, pos, state), Blocks.PSD_DOOR_2::get);
 		PSD_TOP = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "psd_top"), BlockPSDTop.BlockEntity::new, Blocks.PSD_TOP::get);
+		RAILWAY_SIGN_1_EVEN = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "railway_sign_1_even"), (pos, state) -> new BlockRailwaySign.BlockEntity(1, false, pos, state), Blocks.RAILWAY_SIGN_1_EVEN::get);
+		RAILWAY_SIGN_1_ODD = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "railway_sign_1_odd"), (pos, state) -> new BlockRailwaySign.BlockEntity(1, true, pos, state), Blocks.RAILWAY_SIGN_1_ODD::get);
 		RAILWAY_SIGN_2_EVEN = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "railway_sign_2_even"), (pos, state) -> new BlockRailwaySign.BlockEntity(2, false, pos, state), Blocks.RAILWAY_SIGN_2_EVEN::get);
 		RAILWAY_SIGN_2_ODD = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "railway_sign_2_odd"), (pos, state) -> new BlockRailwaySign.BlockEntity(2, true, pos, state), Blocks.RAILWAY_SIGN_2_ODD::get);
 		RAILWAY_SIGN_3_EVEN = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "railway_sign_3_even"), (pos, state) -> new BlockRailwaySign.BlockEntity(3, false, pos, state), Blocks.RAILWAY_SIGN_3_EVEN::get);
@@ -97,6 +99,8 @@ public final class BlockEntityTypes {
 	public static final BlockEntityTypeRegistryObject<BlockPSDDoor.BlockEntity> PSD_DOOR_1;
 	public static final BlockEntityTypeRegistryObject<BlockPSDDoor.BlockEntity> PSD_DOOR_2;
 	public static final BlockEntityTypeRegistryObject<BlockPSDTop.BlockEntity> PSD_TOP;
+	public static final BlockEntityTypeRegistryObject<BlockRailwaySign.BlockEntity> RAILWAY_SIGN_1_EVEN;
+	public static final BlockEntityTypeRegistryObject<BlockRailwaySign.BlockEntity> RAILWAY_SIGN_1_ODD;
 	public static final BlockEntityTypeRegistryObject<BlockRailwaySign.BlockEntity> RAILWAY_SIGN_2_EVEN;
 	public static final BlockEntityTypeRegistryObject<BlockRailwaySign.BlockEntity> RAILWAY_SIGN_2_ODD;
 	public static final BlockEntityTypeRegistryObject<BlockRailwaySign.BlockEntity> RAILWAY_SIGN_3_EVEN;

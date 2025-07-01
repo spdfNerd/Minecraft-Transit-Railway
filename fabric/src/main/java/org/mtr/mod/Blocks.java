@@ -89,6 +89,8 @@ public final class Blocks {
 		PLATFORM_UK_1_SLAB = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "platform_uk_1_slab"), () -> new Block(new BlockPlatformSlab(createDefaultBlockSettings(false))), CreativeModeTabs.STATION_BUILDING_BLOCKS);
 
 		// Signs
+		RAILWAY_SIGN_1_EVEN = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "railway_sign_1_even"), () -> new Block(new BlockRailwaySign(1, false)), CreativeModeTabs.RAILWAY_FACILITIES);
+		RAILWAY_SIGN_1_ODD = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "railway_sign_1_odd"), () -> new Block(new BlockRailwaySign(1, true)), CreativeModeTabs.RAILWAY_FACILITIES);
 		RAILWAY_SIGN_2_EVEN = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "railway_sign_2_even"), () -> new Block(new BlockRailwaySign(2, false)), CreativeModeTabs.RAILWAY_FACILITIES);
 		RAILWAY_SIGN_2_ODD = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "railway_sign_2_odd"), () -> new Block(new BlockRailwaySign(2, true)), CreativeModeTabs.RAILWAY_FACILITIES);
 		RAILWAY_SIGN_3_EVEN = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "railway_sign_3_even"), () -> new Block(new BlockRailwaySign(3, false)), CreativeModeTabs.RAILWAY_FACILITIES);
@@ -328,6 +330,8 @@ public final class Blocks {
 	public static final BlockRegistryObject PSD_GLASS_END_2;
 	public static final BlockRegistryObject PSD_TOP;
 	public static final BlockRegistryObject RAIL_NODE;
+	public static final BlockRegistryObject RAILWAY_SIGN_1_EVEN;
+	public static final BlockRegistryObject RAILWAY_SIGN_1_ODD;
 	public static final BlockRegistryObject RAILWAY_SIGN_2_EVEN;
 	public static final BlockRegistryObject RAILWAY_SIGN_2_ODD;
 	public static final BlockRegistryObject RAILWAY_SIGN_3_EVEN;

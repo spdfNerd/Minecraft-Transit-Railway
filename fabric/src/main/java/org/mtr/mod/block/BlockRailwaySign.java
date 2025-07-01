@@ -217,6 +217,8 @@ public class BlockRailwaySign extends BlockExtension implements IBlock, Directio
 
 		private static BlockEntityType<? extends BlockEntityExtension> getType(int length, boolean isOdd) {
 			switch (length) {
+				case 1:
+					return isOdd ? BlockEntityTypes.RAILWAY_SIGN_1_ODD.get() : BlockEntityTypes.RAILWAY_SIGN_1_EVEN.get();
 				case 2:
 					return isOdd ? BlockEntityTypes.RAILWAY_SIGN_2_ODD.get() : BlockEntityTypes.RAILWAY_SIGN_2_EVEN.get();
 				case 3:

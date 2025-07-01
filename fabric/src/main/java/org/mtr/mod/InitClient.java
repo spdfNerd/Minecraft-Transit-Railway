@@ -153,6 +153,8 @@ public final class InitClient {
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_HORIZONTAL_3, dispatcher -> new RenderPIDS<>(dispatcher, 2.5F, 7.5F, 6, 6.5F, 27, true, 1.25F));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_SINGLE_ARRIVAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));
+		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.RAILWAY_SIGN_1_EVEN, RenderRailwaySign::new);
+		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.RAILWAY_SIGN_1_ODD, RenderRailwaySign::new);
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.RAILWAY_SIGN_2_EVEN, RenderRailwaySign::new);
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.RAILWAY_SIGN_2_ODD, RenderRailwaySign::new);
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.RAILWAY_SIGN_3_EVEN, RenderRailwaySign::new);
